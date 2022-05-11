@@ -8,19 +8,19 @@
 // const claimAmount = 1000;
 // const PolkaBridge = "0xf6c9ff0543f932178262df8c81a12a3132129b51";
 // const devAddress = "0xfEEF5F353aE5022d0cfcD072165cDA284B65772B";
-const P2PExchange = artifacts.require("P2PExchange");
+const YieldSwap = artifacts.require("YieldSwap");
 const WETH = "0xc778417E063141139Fce010982780140Aa0cD5Ab";
 // const WBNB = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";//test
 const fee = 1;
 module.exports = async function(deployer) {
-    // await deployer.deploy(PolkaBridge);//, "0xf6c9ff0543f932178262df8c81a12a3132129b51");
-    // let pbrDeployed = PolkaBridge.deployed();
-    // console.log("PBR deployed at ", PolkaBridge.address);
-    // await deployer.deploy(PolkaBridgeFarm, PolkaBridge, new BigNumber(500000000000000000), 0);
-    // await deployer.deploy(polkaWarGame, PWAR, rewardMultiplier);
-    // await deployer.deploy(PolkaWarFaucet, PWAR, claimAmount);
-    // console.log("polkaWarGame deployed at ", polkaWarGame.address);
-    // console.log("PolkaWarFaucet deployed at ", PolkaWarFaucet.address);
-    await deployer.deploy(P2PExchange, WETH, fee);
-    console.log("P2PExchange deployed at ", P2PExchange.address);
+  // await deployer.deploy(PolkaBridge);//, "0xf6c9ff0543f932178262df8c81a12a3132129b51");
+  // let pbrDeployed = PolkaBridge.deployed();
+  // console.log("PBR deployed at ", PolkaBridge.address);
+  // await deployer.deploy(PolkaBridgeFarm, PolkaBridge, new BigNumber(500000000000000000), 0);
+  // await deployer.deploy(polkaWarGame, PWAR, rewardMultiplier);
+  // await deployer.deploy(PolkaWarFaucet, PWAR, claimAmount);
+  // console.log("polkaWarGame deployed at ", polkaWarGame.address);
+  // console.log("PolkaWarFaucet deployed at ", PolkaWarFaucet.address);
+  await deployer.deploy(YieldSwap, WETH);
+  console.log("YieldSwap deployed at ", YieldSwap.address);
 };
