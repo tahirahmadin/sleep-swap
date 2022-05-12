@@ -1,5 +1,4 @@
-import { Box, Container, Typography, Avatar } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Box, Container, Avatar } from "@mui/material";
 import React, { useCallback } from "react";
 import { makeStyles } from "@mui/styles";
 
@@ -8,6 +7,7 @@ import { requestChalleng } from "../actions/userActions";
 
 import { useUserAuthentication } from "../hooks/useUserAuthentication";
 import { CONNECTOR_TYPE } from "../constants";
+import ConnectButton from "./ConnectButton";
 
 const useStyles = makeStyles((theme) => ({
   linkItems: {
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 15,
   },
   logo: {
-    height: 55,
+    height: 50,
   },
   paper: {
     top: "67px !important",
@@ -126,8 +126,8 @@ const Appbar = ({ requestChalleng }) => {
                 }}
               >
                 <img
-                  src="https://cdn3d.iconscout.com/3d/premium/thumb/strategy-3597238-3010218.png"
-                  alt="Yeild App Logo"
+                  src="https://cdn3d.iconscout.com/3d/free/thumb/squigly-globe-3494833-2926648@0.png"
+                  alt="SleepSwap"
                   className={classes.logo}
                 />
                 <div
@@ -135,10 +135,11 @@ const Appbar = ({ requestChalleng }) => {
                     paddingLeft: 2,
                     color: "black",
                     fontWeight: 700,
+                    fontSize: 20,
                     textDecoration: "none",
                   }}
                 >
-                  Yield Swap
+                  Sleep Swap
                 </div>
               </div>
               <Box>
@@ -163,37 +164,7 @@ const Appbar = ({ requestChalleng }) => {
               <div style={{ padding: 3, paddingRight: 10 }}>
                 <Avatar src="https://mui.com/static/images/avatar/2.jpg" />{" "}
               </div>
-              <div>
-                {authStatus?.authenticated ? (
-                  <button onClick={null} className={classes.connectedButton}>
-                    <span
-                      style={{
-                        color: "#212121",
-                        height: "100%",
-                        fontWeight: 600,
-
-                        fontSize: 16,
-                        letterSpacing: "-0.02em",
-                        color: "#414141",
-                        textAlign: "center",
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      3.65 MATIC
-                    </span>{" "}
-                    <span className={classes.connectedAddress}>
-                      0x98..32342
-                    </span>
-                  </button>
-                ) : (
-                  <button
-                    className={classes.navbarButton}
-                    onClick={handleConnectWallet}
-                  >
-                    {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
-                  </button>
-                )}
-              </div>
+              <ConnectButton />
             </Box>
           </Box>
         </Container>

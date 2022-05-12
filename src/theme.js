@@ -4,7 +4,7 @@ let themes = createTheme({
   palette: {
     action: {
       disabled: "#bdbdbd",
-      disabledBackground: "rgba(209, 255, 26, 0.3)",
+      disabledBackground: "rgba(106, 85, 234,0.6)",
     },
     primary: {
       main: "#6A55EA",

@@ -5,6 +5,7 @@ import {
   Button,
   Container,
   FormControl,
+  Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -18,13 +19,23 @@ const useStyles = makeStyles((theme) => ({
     backgroundPosition: "center center,center center",
     backgroundRepeat: "no-repeat,no-repeat",
     backgroundSize: "cover,contain",
-    height: "100%",
+    height: "88vh",
     width: "100%",
-    paddingTop: "10%",
+    paddingTop: "4%",
   },
   mainHeading: {
     fontWeight: 600,
     fontSize: 48,
+    letterSpacing: "0.02em",
+    color: "#212121",
+    textAlign: "center",
+    [theme.breakpoints.down("md")]: {
+      color: "#212121",
+    },
+  },
+  poolText: {
+    fontWeight: 600,
+    fontSize: 22,
     letterSpacing: "0.02em",
     color: "#212121",
     textAlign: "center",
@@ -70,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
     border: "1px solid #eeeeee",
 
     paddingTop: 30,
-    paddingBottom: 30,
+
     backgroundColor: "#FFFFFF",
     boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
     borderRadius: 10,
@@ -113,99 +124,501 @@ export default function Home() {
     <Box>
       <Box className={classes.background}>
         <h1 variant="h1" className={classes.mainHeading}>
-          Trade Strategically <br />
-          While Sleeping
+          Stake. Sleep. <span style={{ color: "#6A55EA" }}> Repeat.</span>
         </h1>
         <Typography variant="body2" className={classes.para}>
           Experience first decentralized smart strategy trading interface
         </Typography>
 
-        <Container style={{ marginTop: 100 }}>
-          <div className="d-flex justify-content-center">
-            <div className={classes.filterCard}>
-              <Box
-                display="flex"
-                flexDirection={"column"}
-                justifyContent="space-around"
-                alignItems="center"
-                mt={3}
-              >
-                <Box px={2}>
-                  <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                    <InputLabel id="demo-simple-select-standard-label">
-                      Token 1
-                    </InputLabel>
-
-                    <Select
-                      variant="standard"
-                      disableUnderline={true}
-                      value={fiat}
-                      label="Age"
-                      style={{
-                        fontWeight: 600,
-                        letterSpacing: 1,
-                        color: "#212121",
-                      }}
-                      onChange={(e) => setFiat(e.target.value)}
-                    >
-                      <MenuItem value={"BTC"}>BTC</MenuItem>
-                      <MenuItem value={"ETH"}>ETH</MenuItem>
-                      <MenuItem value={"PBR"}>PBR</MenuItem>
-                      <MenuItem value={"PBR"}>PWAR</MenuItem>
-                      <MenuItem value={"PBR"}>DOT</MenuItem>
-                      <MenuItem value={"PBR"}>LINK</MenuItem>
-                      <MenuItem value={"PBR"}>SOL</MenuItem>
-                      <MenuItem value={"PBR"}>USDT</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-
-                <Box px={2}>
-                  <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                    <InputLabel id="demo-simple-select-standard-label">
-                      Token 2
-                    </InputLabel>
-
-                    <Select
-                      variant="standard"
-                      disableUnderline={true}
-                      value={token}
-                      label="Age"
-                      style={{
-                        fontWeight: 600,
-                        letterSpacing: 1,
-                        color: "#212121",
-                      }}
-                      onChange={(e) => setToken(e.target.value)}
-                    >
-                      <MenuItem value={"BTC"}>BTC</MenuItem>
-                      <MenuItem value={"ETH"}>ETH</MenuItem>
-                      <MenuItem value={"PBR"}>PBR</MenuItem>
-                      <MenuItem value={"PWAR"}>PWAR</MenuItem>
-                      <MenuItem value={"DOT"}>DOT</MenuItem>
-                      <MenuItem value={"LINK"}>LINK</MenuItem>
-                      <MenuItem value={"SOL"}>SOL</MenuItem>
-                      <MenuItem value={"USDT"}>USDT</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-
-                <Box px={2}>
-                  <Button
-                    onClick={updateFilters}
-                    style={{
-                      borderRadius: 10,
-                      background: "#6A55EA",
-                      padding: "9px 35px 9px 35px",
-                      color: "white",
-                    }}
+        <Container style={{ marginTop: 40 }}>
+          <div className="text-center"></div>
+          <h6 variant="h1" className={classes.poolText}>
+            Available Strategies
+          </h6>
+          <Grid container>
+            <Grid item md={4}>
+              <div className={classes.filterCard}>
+                <Box pt={0} px={3}>
+                  <Box
+                    display="flex"
+                    flexDirection={"row"}
+                    justifyContent="center"
+                    alignItems="center"
                   >
-                    Begin Strategy
-                  </Button>
+                    <Box
+                      display="flex"
+                      flexDirection={"row"}
+                      justifyContent="flex-start"
+                      alignItems="center"
+                    >
+                      <img
+                        src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
+                        alt="Polygon"
+                        height="20px"
+                      />{" "}
+                      <img
+                        src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                        alt="USDT"
+                        height="20px"
+                      />
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      className={classes.para}
+                      textAlign="left"
+                      fontWeight={600}
+                      ml={1}
+                    >
+                      MATIC/USDT
+                    </Typography>
+                  </Box>
+                  <Box display={"flex"} justifyContent={"space-around"} mt={3}>
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Total Deposits
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        $12,320
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Avg Gains
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        + 1,436
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      mt={3}
+                      style={{
+                        border: "1px solid rgba(106, 85, 234,0.1)",
+                        padding: "10px 10px 10px 10px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Your stake
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        $1000
+                      </Typography>
+                    </Box>
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      mt={2}
+                      style={{
+                        border: "1px solid rgba(106, 85, 234,0.1)",
+                        padding: "10px 10px 10px 10px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Earning
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        $118
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box px={2} mt={2} className="text-center">
+                    <Button
+                      onClick={updateFilters}
+                      style={{
+                        borderRadius: 10,
+                        background: "#6A55EA",
+                        padding: "9px 20px 9px 20px",
+                        color: "white",
+                      }}
+                    >
+                      Start Strategy
+                    </Button>
+                  </Box>
                 </Box>
-              </Box>
-            </div>
-          </div>
+              </div>
+            </Grid>
+            <Grid item md={4}>
+              <div className={classes.filterCard}>
+                <Box pt={0} px={3}>
+                  <Box
+                    display="flex"
+                    flexDirection={"row"}
+                    justifyContent="center"
+                    alignItems="center"
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection={"row"}
+                      justifyContent="flex-start"
+                      alignItems="center"
+                    >
+                      <img
+                        src="https://cdn3d.iconscout.com/3d/premium/thumb/ethereum-4924303-4102054.png"
+                        alt="Polygon"
+                        height="20px"
+                      />{" "}
+                      <img
+                        src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                        alt="USDT"
+                        height="20px"
+                      />
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      className={classes.para}
+                      textAlign="left"
+                      fontWeight={600}
+                      ml={1}
+                    >
+                      ETH/USDT
+                    </Typography>
+                  </Box>
+                  <Box display={"flex"} justifyContent={"space-around"} mt={3}>
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Total Deposits
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        $0
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Avg Gains
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        0
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      mt={3}
+                      style={{
+                        border: "1px solid rgba(106, 85, 234,0.1)",
+                        padding: "10px 10px 10px 10px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Your stake
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        $0
+                      </Typography>
+                    </Box>
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      mt={2}
+                      style={{
+                        border: "1px solid rgba(106, 85, 234,0.1)",
+                        padding: "10px 10px 10px 10px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Earning
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        $0
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box px={2} mt={2} className="text-center">
+                    <Button
+                      style={{
+                        borderRadius: 10,
+                        background: "rgba(106, 85, 234,0.6)",
+                        padding: "9px 20px 9px 20px",
+                        color: "white",
+                      }}
+                    >
+                      Coming Soon
+                    </Button>
+                  </Box>
+                </Box>
+              </div>
+            </Grid>
+            <Grid item md={4}>
+              <div className={classes.filterCard}>
+                <Box pt={0} px={3}>
+                  <Box
+                    display="flex"
+                    flexDirection={"row"}
+                    justifyContent="center"
+                    alignItems="center"
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection={"row"}
+                      justifyContent="flex-start"
+                      alignItems="center"
+                    >
+                      <img
+                        src="https://cdn3d.iconscout.com/3d/premium/thumb/chainlink-coin-4199896-3478982@0.png"
+                        alt="Polygon"
+                        height="20px"
+                      />{" "}
+                      <img
+                        src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                        alt="USDT"
+                        height="20px"
+                      />
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      className={classes.para}
+                      textAlign="left"
+                      fontWeight={600}
+                      ml={1}
+                    >
+                      LINK/USDT
+                    </Typography>
+                  </Box>
+                  <Box display={"flex"} justifyContent={"space-around"} mt={3}>
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Total Deposits
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        $0
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Avg Gains
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        0
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      mt={3}
+                      style={{
+                        border: "1px solid rgba(106, 85, 234,0.1)",
+                        padding: "10px 10px 10px 10px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Your stake
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        $0
+                      </Typography>
+                    </Box>
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      mt={2}
+                      style={{
+                        border: "1px solid rgba(106, 85, 234,0.1)",
+                        padding: "10px 10px 10px 10px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        Earning
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        ml={1}
+                      >
+                        $0
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box px={2} mt={2} className="text-center">
+                    <Button
+                      disabled={true}
+                      style={{
+                        borderRadius: 10,
+                        background: "rgba(106, 85, 234,0.6)",
+                        padding: "9px 20px 9px 20px",
+                        color: "white",
+                      }}
+                    >
+                      Coming Soon
+                    </Button>
+                  </Box>
+                </Box>
+              </div>
+            </Grid>
+          </Grid>
         </Container>
       </Box>
     </Box>

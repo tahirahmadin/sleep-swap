@@ -10,19 +10,24 @@ import { Container } from "@mui/material";
 import Footer from "./common/Footer";
 import { Provider } from "react-redux";
 import store from "./store";
+import { MoralisProvider } from "react-moralis";
 
+const applicationId = "WCJyTcbMoLK1YCm39SV7XTB6kRZuMw7gf0IbF2Dd";
+const serverUrl = "https://tubezrrbvi7q.usemoralis.com:2053/server";
 function App() {
   return (
     <Provider store={store}>
       <ThemeProvider theme={theme}>
-        <Fragment>
-          <Router>
-            <Appbar />
-            <Routes>
-              <Route path="/" element={<Home />} />
-            </Routes>
-          </Router>
-        </Fragment>
+        <MoralisProvider appId={applicationId} serverUrl={serverUrl}>
+          <Fragment>
+            <Router>
+              <Appbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+              </Routes>
+            </Router>
+          </Fragment>
+        </MoralisProvider>
       </ThemeProvider>
     </Provider>
   );
