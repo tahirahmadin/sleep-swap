@@ -86,6 +86,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         uint256 feeAmount
     );
     event StartYieldSwap(address userAddress, uint256 tokenAmount);
+    event WithdrawUserFunds(address, uint256 userEth, uint256 userUsdt);
 
     function getEthPriceUsd() public view returns (uint256) {
         (, int256 price, , , ) = eth_usd_price_feed.latestRoundData();
@@ -119,13 +120,8 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
 
     // Write methods
 
-    // 1. startYieldSwap Deposit and ready for trade.  done
-    // 2. Buy Tokens
-    // 3. Sell Tokens
     // 4. Update Strategy Percentage
     // 5. withdraw user tokens
-    // 6. deposit eth liquidity {Owner} done
-    // 7. withdraw eth liquidity {Owner}  done
 
     function UpdateStrategyPercentage(uint256 _percent)
         public
@@ -185,10 +181,14 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     }
 
     // Function to deposit fiat into pool
-    function startYieldSwap(address _token, uint256 _tokenAmount) public {
+    function startYieldSwap(
+        address _token,
+        uint256 _tokenAmount,
+        uint256 ethPriceInUSD
+    ) public {
         require(_tokenAmount > 0, "Stake amount should be greater than 0.");
 
-        uint256 ethPriceInUSD = getEthPriceUsd();
+        // uint256 ethPriceInUSD = getEthPriceUsd();
         // buy eth with half of the _tokenAmount, with current eth price
         uint256 usdtAmountForEth = _tokenAmount.div(2);
         uint256 remainingUsdt = _tokenAmount - usdtAmountForEth;
@@ -250,8 +250,8 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         public
         view
         returns (
-            uint256 _ethBalance,
-            uint256 _usdtBalance,
+            uint256 _tokenBalance,
+            uint256 _fiatBalance,
             uint256 totalUsdValue,
             uint256 _usdtOrderAmount,
             uint256 _ethOrderAmount,
@@ -259,18 +259,18 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         )
     {
         UserInfo storage user = users[_account];
-        _ethBalance = user.tokenBalance;
-        _usdtBalance = user.fiatBalance;
+        _tokenBalance = user.tokenBalance;
+        _fiatBalance = user.fiatBalance;
 
-        uint256 usdtValue = _usdtBalance.div(tokenDecimals);
-        uint256 ethValue = _ethBalance.mul(getEthPriceUsd()).div(ethDecimals);
+        uint256 usdtValue = _fiatBalance.div(tokenDecimals);
+        uint256 ethValue = _tokenBalance.mul(getEthPriceUsd()).div(ethDecimals);
         totalUsdValue = usdtValue + ethValue;
         _usdtOrderAmount = user.fiatAmountForEachOrder;
         _ethOrderAmount = user.ethAmountForEachOrder;
         _ethPrice = user.lastEthPrice;
         return (
-            _ethBalance,
-            _usdtBalance,
+            _tokenBalance,
+            _fiatBalance,
             totalUsdValue,
             _usdtOrderAmount,
             _ethOrderAmount,
@@ -288,7 +288,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     }
 
     // Function to withdraw reserves from pool
-    function withdrawEth() public onlyOwner returns (bool) {
+    function withdrawEth() public onlyOwner {
         require(totalEthInPool > 0, "resevr in pool must be greater than 0.");
 
         // uint256 ethBalance = address(this).balance;
@@ -301,12 +301,32 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         totalFee -= _totalFeeEth;
 
         emit WithdrawReserves(msg.sender, _totalReserveEth, _totalFeeEth);
-        return false;
+    }
+
+    // Withdraw user's current eth and usdt
+    function withdrawUserFunds(address _token) public {
+        UserInfo storage user = users[msg.sender];
+
+        uint256 userUsdt = user.fiatBalance;
+        uint256 userEth = user.tokenBalance;
+
+        address payable to = payable(msg.sender);
+        to.transfer(userEth);
+
+        IERC20(_token).transfer(msg.sender, userUsdt);
+
+        user.tokenBalance -= userEth;
+        user.fiatBalance -= userUsdt;
+
+        user.ethAmountForEachOrder = 0;
+        user.fiatAmountForEachOrder = 0;
+
+        emit WithdrawUserFunds(msg.sender, userEth, userUsdt);
     }
 
     // add this check before executing runOrder function
     //  if(_orderGridStatus[0] >=  buySellSteps  or _orderGridStatus[1] >=  buySellSteps)
-
+    // 2 stage
     function runOrder(uint256 _orderIndex, uint256 _ethPriceUsd) public {
         require(
             _orderIndex >= lastOrderIndexExecuted,
@@ -361,16 +381,14 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         return ((newValue - oldValue) * 100) / oldValue;
     }
 
+    // 1
     function updateOrderIndexes(uint256 currentEthPrice) public {
         for (uint256 i = 0; i < orderPrices.length; i++) {
             uint256 _orderPrice = orderPrices[i];
-            address userAddress = orderUsers[i];
-
-            UserInfo memory user = users[userAddress];
 
             int256 priceChange = percentChange(
-                int256(currentEthPrice),
-                int256(user.lastEthPrice)
+                int256(_orderPrice),
+                int256(currentEthPrice)
             );
 
             if (priceChange >= 10) {
@@ -419,5 +437,36 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         for (uint256 i = 0; i < 10; i++) {
             runOrder(i, ethPrice);
         }
+    }
+
+    // test version of upkeep function
+    function runOrders(uint256 ethPrice) public {
+        uint256 ordersToRun;
+        uint256 orderQueLength = orderQue.length - lastOrderIndexExecuted;
+        if (orderQueLength > 10) {
+            ordersToRun = 10;
+        } else {
+            ordersToRun = orderQueLength;
+        }
+
+        for (uint256 i = lastOrderIndexExecuted; i < ordersToRun; i++) {
+            runOrder(i, ethPrice);
+        }
+    }
+
+    // test function to momitor structs
+    function orderUsersFn(uint256 index) public view returns (address) {
+        return orderUsers[index];
+    }
+
+    function orderCurrentBuySellGridCountsFn(uint256 index)
+        public
+        view
+        returns (uint256, uint256)
+    {
+        return (
+            orderCurrentBuySellGridCounts[index][0],
+            orderCurrentBuySellGridCounts[index][1]
+        );
     }
 }
