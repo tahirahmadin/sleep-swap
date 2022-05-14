@@ -16,10 +16,6 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     uint256 public totalEthInPool;
     uint256 public totalUsdtInPool;
 
-    uint256 internal multplier_feed = 10**10;
-    uint256 internal multplier_usd = 10**8;
-    uint256 internal multplier_decimal = 10**18;
-
     uint256 priceFeedDecimals = 10**8;
     uint256 ethDecimals = 10**18; // eth decimals
     uint256 tokenDecimals = 10**6; // usdt token decimals
@@ -44,7 +40,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     mapping(address => bool) public stakers;
 
     //list of order prices for each user
-    uint256[] orderPrices;
+    uint256[] public orderPrices;
 
     mapping(uint256 => address) orderUsers;
 
@@ -57,6 +53,10 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     // number of steps for buy and sell defined buy users
     mapping(address => uint256[]) userBuySellGridSize;
 
+    uint256[] public orderQue; // store list of order indexes to execute
+    uint256[] public orderTypes; // 1 buy/   0 sell
+    uint256 public lastOrderIndexExecuted = 0;
+
     /**
      * Network: Koven Testnet
      */
@@ -66,7 +66,6 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     address internal maticUsdDataFeedMumbai =
         0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada;
 
-    uint256 public fee = 250000000000000000; // fee in 18 decimal wei value
     uint256 public totalFee;
 
     constructor() {
@@ -80,8 +79,12 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     }
 
     event UpdateStrategy(uint256 Percentage);
-    event Staked(address userAddress, uint256 fiatAmount);
-    event Unstaked(address userAddress, uint256 fiatAmount);
+    event DepositReserve(address userAddress, uint256 ethAmount);
+    event WithdrawReserves(
+        address userAddress,
+        uint256 ethAmount,
+        uint256 feeAmount
+    );
     event StartYieldSwap(address userAddress, uint256 tokenAmount);
 
     function getEthPriceUsd() public view returns (uint256) {
@@ -139,9 +142,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         uint256 _usdtAmount,
         uint256 _ethPrice
     ) internal {
-        uint256 usdtAfterFee = _usdtAmount.mul(100 - fee.div(ethDecimals)).div(
-            100
-        );
+        uint256 usdtAfterFee = _usdtAmount.mul(399).div(4).div(100);
         uint256 orderFee = convertUsdtToEth(
             _usdtAmount - usdtAfterFee,
             _ethPrice
@@ -166,9 +167,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         uint256 _ethAmount,
         uint256 _ethPrice
     ) internal {
-        uint256 ethAfterFee = _ethAmount.mul(100 - fee.div(ethDecimals)).div(
-            100
-        );
+        uint256 ethAfterFee = _ethAmount.mul(399).div(4).div(100);
         uint256 orderFee = _ethAmount - ethAfterFee;
 
         totalFee += orderFee;
@@ -193,13 +192,21 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         // buy eth with half of the _tokenAmount, with current eth price
         uint256 usdtAmountForEth = _tokenAmount.div(2);
         uint256 remainingUsdt = _tokenAmount - usdtAmountForEth;
-        uint256 minEthToBought = convertUsdtToEth(
-            usdtAmountForEth,
+
+        // deduct fee
+        uint256 usdtAfterFee = usdtAmountForEth.mul(399).div(4).div(100);
+        uint256 orderFee = convertUsdtToEth(
+            usdtAmountForEth - usdtAfterFee,
             ethPriceInUSD
         );
 
+        totalFee += orderFee;
+        totalEthInPool += orderFee;
+
+        uint256 minEthReceived = convertUsdtToEth(usdtAfterFee, ethPriceInUSD);
+
         require(
-            totalEthInPool > minEthToBought,
+            totalEthInPool > minEthReceived,
             "Not enough pool balance to start trade"
         );
 
@@ -207,18 +214,19 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
 
         UserInfo storage user = users[msg.sender];
 
-        buyEthWithFee(user.userAddress, usdtAmountForEth, ethPriceInUSD);
-        // // update user and pool balances on deposit start
-        // totalUsdtInPool += remainingUsdt;
-        // user.fiatBalance +=  remainingUsdt;
-        // user.fiatAmountForEachOrder = user.fiatBalance.div(buySellSteps);
+        // buyEthWithFee(msg.sender, usdtAmountForEth, ethPriceInUSD);
+        // update user and pool balances on deposit start
+        totalUsdtInPool += usdtAfterFee;
 
-        // totalEthInPool -= minEthToBought;
-        // user.tokenBalance += minEthToBought;
-        // user.ethAmountForEachOrder = user.tokenBalance.div(buySellSteps);
+        user.fiatBalance += remainingUsdt;
+        user.fiatAmountForEachOrder = user.fiatBalance.div(buySellSteps);
+
+        totalEthInPool -= minEthReceived;
+        user.tokenBalance += minEthReceived;
+        user.ethAmountForEachOrder = user.tokenBalance.div(buySellSteps);
 
         user.depositTimeStamp = block.timestamp;
-        user.lastEthPrice = getEthPriceUsd();
+        user.lastEthPrice = ethPriceInUSD;
 
         if (stakers[msg.sender] != true) {
             user.userAddress = msg.sender;
@@ -227,13 +235,13 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         // update user and pool balances on deposit end
 
         // configure ordre and mappings start
-        orderPrices.push(user.lastEthPrice);
+        orderPrices.push(ethPriceInUSD);
         uint256 currenIndex = orderPrices.length - 1;
 
         orderCurrentBuySellGridCounts[currenIndex] = [0, 0];
 
         orderUsers[currenIndex] = msg.sender;
-        // configure ordre and mappings start
+        // configure order and mappings end
 
         emit StartYieldSwap(msg.sender, _tokenAmount);
     }
@@ -246,7 +254,8 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
             uint256 _usdtBalance,
             uint256 totalUsdValue,
             uint256 _usdtOrderAmount,
-            uint256 _ethOrderAmount
+            uint256 _ethOrderAmount,
+            uint256 _ethPrice
         )
     {
         UserInfo storage user = users[_account];
@@ -258,81 +267,52 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         totalUsdValue = usdtValue + ethValue;
         _usdtOrderAmount = user.fiatAmountForEachOrder;
         _ethOrderAmount = user.ethAmountForEachOrder;
+        _ethPrice = user.lastEthPrice;
         return (
             _ethBalance,
             _usdtBalance,
             totalUsdValue,
             _usdtOrderAmount,
-            _ethOrderAmount
+            _ethOrderAmount,
+            _ethPrice
         );
     }
 
     //  stake eth reseves into pool
-    function Stake() public payable onlyOwner {
+    function depositEth() public payable onlyOwner {
         require(msg.value > 0, "Stake amount should be greater than 0.");
 
         totalEthInPool += msg.value;
 
-        emit Staked(msg.sender, msg.value);
+        emit DepositReserve(msg.sender, msg.value);
     }
 
-    // Function to withdraw fiat(usdt) from pool
-    function Unstake() public onlyOwner returns (bool) {
+    // Function to withdraw reserves from pool
+    function withdrawEth() public onlyOwner returns (bool) {
         require(totalEthInPool > 0, "resevr in pool must be greater than 0.");
 
         // uint256 ethBalance = address(this).balance;
         address payable to = payable(msg.sender);
-        to.transfer(totalEthInPool);
+        uint256 _totalReserveEth = totalEthInPool;
+        uint256 _totalFeeEth = totalFee;
+        to.transfer(_totalReserveEth + _totalFeeEth);
 
-        totalEthInPool -= totalEthInPool;
+        totalEthInPool -= _totalReserveEth;
+        totalFee -= _totalFeeEth;
 
-        emit Unstaked(msg.sender, totalEthInPool);
+        emit WithdrawReserves(msg.sender, _totalReserveEth, _totalFeeEth);
         return false;
-    }
-
-    function percentChange(uint256 oldValue, uint256 newValue)
-        internal
-        view
-        returns (int256)
-    {
-        int256 numerator = int256(newValue - oldValue);
-        int256 percentChange = (numerator * 100) / int256(oldValue);
-        return percentChange;
-    }
-
-    uint256[] internal orderQue; // store list of order indexes to execute
-    uint256[] internal orderTypes; // 1 buy/   0 sell
-    uint256 internal lastOrderIndexExecuted;
-
-    function updateOrderIndexes() public {
-        uint256 currentEthPrice = getEthPriceUsd();
-
-        for (uint256 i = 0; i < orderPrices.length; i++) {
-            uint256 _orderPrice = orderPrices[i];
-            address userAddress = orderUsers[i];
-
-            UserInfo memory user = users[userAddress];
-
-            int256 priceChange = percentChange(
-                currentEthPrice,
-                user.lastEthPrice
-            );
-
-            if (priceChange >= 10) {
-                // sell order
-                orderQue.push(i);
-                orderTypes.push(0);
-            } else if (priceChange <= -10) {
-                orderQue.push(i);
-                orderTypes.push(1);
-            }
-        }
     }
 
     // add this check before executing runOrder function
     //  if(_orderGridStatus[0] >=  buySellSteps  or _orderGridStatus[1] >=  buySellSteps)
 
     function runOrder(uint256 _orderIndex, uint256 _ethPriceUsd) public {
+        require(
+            _orderIndex >= lastOrderIndexExecuted,
+            "This order is already executed"
+        );
+
         address userAddress = orderUsers[_orderIndex];
         UserInfo storage user = users[userAddress];
 
@@ -373,11 +353,36 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         lastOrderIndexExecuted = _orderIndex;
     }
 
-    // function autosell() internal {}
+    function percentChange(int256 oldValue, int256 newValue)
+        public
+        view
+        returns (int256)
+    {
+        return ((newValue - oldValue) * 100) / oldValue;
+    }
 
-    // function withdrawAll() public {}
+    function updateOrderIndexes(uint256 currentEthPrice) public {
+        for (uint256 i = 0; i < orderPrices.length; i++) {
+            uint256 _orderPrice = orderPrices[i];
+            address userAddress = orderUsers[i];
 
-    // function userBalance(address _address) public view {}
+            UserInfo memory user = users[userAddress];
+
+            int256 priceChange = percentChange(
+                int256(currentEthPrice),
+                int256(user.lastEthPrice)
+            );
+
+            if (priceChange >= 10) {
+                // sell order
+                orderQue.push(i);
+                orderTypes.push(0);
+            } else if (priceChange <= -10) {
+                orderQue.push(i);
+                orderTypes.push(1);
+            }
+        }
+    }
 
     //1. write automatic buy function on price down with 0.25% fee duduction.
     //2. write automatic sell function on price up with 0.25% fee deduction.
@@ -388,6 +393,14 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         bytes calldata /* checkData */
     ) external view override returns (bool upkeepNeeded, bytes memory) {
         upkeepNeeded = false;
+        // check if order que is empty then update order que
+
+        if (orderQue.length == lastOrderIndexExecuted) {
+            // order que is empty
+            // update order index
+            // updateOrderIndexes();
+        }
+
         // We don't use the checkData in this example. The checkData is defined when the Upkeep was registered.
     }
 
@@ -400,5 +413,11 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         //     counter = counter + 1;
         // }
         // We don't use the performData in this example. The performData is generated by the Keeper's call to your checkUpkeep function
+
+        // iterate order que and run each order
+        uint256 ethPrice = getEthPriceUsd();
+        for (uint256 i = 0; i < 10; i++) {
+            runOrder(i, ethPrice);
+        }
     }
 }
