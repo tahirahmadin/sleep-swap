@@ -22,10 +22,10 @@ const useStyles = makeStyles((theme) => ({
   },
   container: {
     width: "100%",
-    height: 420,
+    height: "fit-content",
     padding: 10,
-    minHeight: 350,
-    maxWidth: 788,
+    minHeight: 400,
+    maxWidth: 540,
     position: "relative",
     background: "#fff",
     border: "15px solid #6A55EA",
@@ -195,17 +195,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AccountPopup = ({ setWhitelistPopup }) => {
+const AccountPopup = ({ setBalancePopup }) => {
   const classes = useStyles();
 
-  const {
-    authenticate,
-    isAuthenticated,
-    isAuthenticating,
-    user,
-    logout,
-    current,
-  } = useMoralis();
+  const { user, logout } = useMoralis();
 
   const Web3Api = useMoralisWeb3Api();
   const userAddress = user ? user.attributes.ethAddress : "...";
@@ -215,6 +208,7 @@ const AccountPopup = ({ setWhitelistPopup }) => {
   useEffect(() => {
     fetchBalance();
   }, []);
+
   const fetchBalance = async () => {
     const result = await Web3Api.account.getNativeBalance({
       network: "mumbai",
@@ -226,7 +220,7 @@ const AccountPopup = ({ setWhitelistPopup }) => {
   };
 
   const resetPopup = () => {
-    setWhitelistPopup(false);
+    setBalancePopup(false);
   };
 
   return (
@@ -272,7 +266,7 @@ const AccountPopup = ({ setWhitelistPopup }) => {
                       variant="h6"
                       className={classes.heading}
                       fontWeight={600}
-                      fontSize={16}
+                      fontSize={17}
                       textAlign="left"
                     >
                       Address :
@@ -281,12 +275,12 @@ const AccountPopup = ({ setWhitelistPopup }) => {
                       variant="h6"
                       className={classes.para}
                       fontWeight={400}
-                      fontSize={16}
+                      fontSize={14}
                       textAlign="left"
                     >
-                      <pre>{userAddress}</pre>
-
-                      {console.log(fetchBalance())}
+                      <pre style={{ wordWrap: "break-word" }}>
+                        {userAddress}
+                      </pre>
                     </Typography>
                   </div>
                   <div className="mt-1">
@@ -294,7 +288,7 @@ const AccountPopup = ({ setWhitelistPopup }) => {
                       variant="h6"
                       className={classes.heading}
                       fontWeight={600}
-                      fontSize={16}
+                      fontSize={17}
                       textAlign="left"
                     >
                       Balance :
@@ -303,7 +297,7 @@ const AccountPopup = ({ setWhitelistPopup }) => {
                       variant="h6"
                       className={classes.para}
                       fontWeight={400}
-                      fontSize={16}
+                      fontSize={14}
                       textAlign="left"
                     >
                       <pre>{balance} MATIC</pre>

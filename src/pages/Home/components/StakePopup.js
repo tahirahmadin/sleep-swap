@@ -15,6 +15,7 @@ import { makeStyles } from "@mui/styles";
 import { Close } from "@mui/icons-material";
 import { useMoralis, useMoralisWeb3Api } from "react-moralis";
 import Web3 from "web3";
+import TxPopup from "../../../common/TxPopup";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -38,8 +39,9 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     height: "fit-content",
     padding: 10,
-    minHeight: 400,
-    maxWidth: 500,
+    minHeight: 440,
+
+    maxWidth: 540,
     position: "relative",
     background: "#fff",
     border: "15px solid #6A55EA",
@@ -209,7 +211,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const StakePopup = ({ stakePopup, setStakePopup }) => {
+const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
   const classes = useStyles();
 
   const { user, logout } = useMoralis();
@@ -267,94 +269,19 @@ const StakePopup = ({ stakePopup, setStakePopup }) => {
     >
       <div className={classes.background}>
         <div className={classes.container}>
-          <div className="h-100 w-100">
-            <div className="d-flex justify-content-end" onClick={resetPopup}>
-              <Close style={{ cursor: "pointer" }} />
-            </div>
-            <div className="d-flex flex-column justify-content-around">
-              <div>
-                <Typography
-                  variant="h4"
-                  className={classes.heading}
-                  fontWeight={700}
-                >
-                  Stake
-                </Typography>
-                <Box
-                  display="flex"
-                  flexDirection={"row"}
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <Box
-                    display="flex"
-                    flexDirection={"row"}
-                    justifyContent="flex-start"
-                    alignItems="center"
-                  >
-                    <img
-                      src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
-                      alt="Polygon"
-                      height="20px"
-                    />{" "}
-                    <img
-                      src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
-                      alt="USDT"
-                      height="20px"
-                    />
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    className={classes.para}
-                    textAlign="left"
-                    fontWeight={600}
-                    ml={1}
-                  >
-                    MATIC/USDT
-                  </Typography>
-                </Box>
+          {txCase === 0 && (
+            <div className="h-100 w-100">
+              <div className="d-flex justify-content-end" onClick={resetPopup}>
+                <Close style={{ cursor: "pointer" }} />
               </div>
-
-              <Box
-                display={"flex"}
-                justifyContent={"space-between"}
-                mt={2}
-                style={{
-                  border: "1px solid rgba(106, 85, 234,0.2)",
-                  padding: "6px 20px 6px 20px",
-
-                  borderRadius: 10,
-                  backgroundColor: "rgba(106, 85, 234,0.03)",
-                }}
-              >
-                <Box>
+              <div className="d-flex flex-column justify-content-around">
+                <div>
                   <Typography
-                    variant="body2"
-                    textAlign={"left"}
-                    className={classes.para}
-                    fontWeight={500}
-                    fontSize={12}
-                    color={"#757575"}
+                    variant="h4"
+                    className={classes.heading}
+                    fontWeight={700}
                   >
-                    Amount:
-                  </Typography>
-                  <Input
-                    disableUnderline
-                    fullWidth
-                    placeholder="0"
-                    style={{ fontSize: 24, fontWeight: 600 }}
-                  />
-                </Box>
-                <Box>
-                  <Typography
-                    variant="body2"
-                    textAlign={"left"}
-                    className={classes.para}
-                    fontWeight={500}
-                    fontSize={12}
-                    color={"#757575"}
-                  >
-                    Available: 3,235
+                    Stake
                   </Typography>
                   <Box
                     display="flex"
@@ -369,73 +296,110 @@ const StakePopup = ({ stakePopup, setStakePopup }) => {
                       alignItems="center"
                     >
                       <img
-                        src="https://cdn3d.iconscout.com/3d/premium/thumb/usdt-coin-4999518-4160019.png"
-                        alt="USDT"
-                        height="30px"
+                        src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
+                        alt="Polygon"
+                        height="20px"
                       />{" "}
+                      <img
+                        src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                        alt="USDT"
+                        height="20px"
+                      />
                     </Box>
                     <Typography
                       variant="body2"
                       className={classes.para}
-                      fontSize={20}
                       textAlign="left"
                       fontWeight={600}
                       ml={1}
                     >
-                      USDT
+                      MATIC/USDT
                     </Typography>
                   </Box>
+                </div>
+
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  mt={2}
+                  style={{
+                    border: "1px solid rgba(106, 85, 234,0.2)",
+                    padding: "6px 20px 6px 20px",
+
+                    borderRadius: 10,
+                    backgroundColor: "rgba(106, 85, 234,0.03)",
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      textAlign={"left"}
+                      className={classes.para}
+                      fontWeight={500}
+                      fontSize={12}
+                      color={"#757575"}
+                    >
+                      Amount:
+                    </Typography>
+                    <Input
+                      disableUnderline
+                      fullWidth
+                      placeholder="0"
+                      style={{ fontSize: 24, fontWeight: 600 }}
+                    />
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      textAlign={"left"}
+                      className={classes.para}
+                      fontWeight={500}
+                      fontSize={12}
+                      color={"#757575"}
+                    >
+                      Available: 3,235
+                    </Typography>
+                    <Box
+                      display="flex"
+                      flexDirection={"row"}
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <Box
+                        display="flex"
+                        flexDirection={"row"}
+                        justifyContent="flex-start"
+                        alignItems="center"
+                      >
+                        <img
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/usdt-coin-4999518-4160019.png"
+                          alt="USDT"
+                          height="30px"
+                        />{" "}
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        fontSize={20}
+                        textAlign="left"
+                        fontWeight={600}
+                        ml={1}
+                      >
+                        USDT
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </Box>
-              <Box
-                mt={2}
-                style={{
-                  border: "1px solid rgba(106, 85, 234,0.2)",
-                  padding: "6px 30px 6px 30px",
-                  borderRadius: 10,
-                  backgroundColor: "rgba(106, 85, 234,0.03)",
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="body2"
-                    textAlign={"left"}
-                    className={classes.para}
-                    fontWeight={500}
-                    fontSize={12}
-                    color={"#757575"}
-                  >
-                    Grids:
-                  </Typography>
-                  <Slider
-                    defaultValue={10}
-                    getAriaValueText={valuetext}
-                    step={null}
-                    marks={marks}
-                    fullWidth
-                  />
-                </Box>
-              </Box>
-              <Box></Box>
-              <Grid
-                container
-                display={"flex"}
-                justifyContent={"space-between"}
-                mt={2}
-                style={{
-                  border: "1px solid rgba(106, 85, 234,0.2)",
-                  padding: "6px 30px 6px 30px",
-                  borderRadius: 10,
-                  backgroundColor: "rgba(106, 85, 234,0.03)",
-                }}
-              >
-                <Grid item md={6} style={{ paddingRight: 10 }}>
-                  <Box
-                    style={{
-                      borderRight: "1px solid #e5e5e5",
-                      paddingRight: 10,
-                    }}
-                  >
+                <Box
+                  mt={2}
+                  style={{
+                    border: "1px solid rgba(106, 85, 234,0.2)",
+                    padding: "6px 30px 6px 30px",
+                    borderRadius: 10,
+                    backgroundColor: "rgba(106, 85, 234,0.03)",
+                  }}
+                >
+                  <Box>
                     <Typography
                       variant="body2"
                       textAlign={"left"}
@@ -446,87 +410,129 @@ const StakePopup = ({ stakePopup, setStakePopup }) => {
                     >
                       Grids:
                     </Typography>
+                    <Slider
+                      defaultValue={10}
+                      getAriaValueText={valuetext}
+                      step={null}
+                      marks={marks}
+                      fullWidth
+                    />
+                  </Box>
+                </Box>
+                <Box></Box>
+                <Grid
+                  container
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  mt={2}
+                  style={{
+                    border: "1px solid rgba(106, 85, 234,0.2)",
+                    padding: "6px 30px 6px 30px",
+                    borderRadius: 10,
+                    backgroundColor: "rgba(106, 85, 234,0.03)",
+                  }}
+                >
+                  <Grid item md={6} style={{ paddingRight: 10 }}>
+                    <Box
+                      style={{
+                        borderRight: "1px solid #e5e5e5",
+                        paddingRight: 10,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Grids:
+                      </Typography>
+                      <Input
+                        disableUnderline
+                        fullWidth
+                        placeholder="10"
+                        style={{ fontSize: 22, fontWeight: 600 }}
+                      />
+                    </Box>
+                  </Grid>
+                  <Grid item md={6} style={{ paddingLeft: 10 }}>
+                    <Typography
+                      variant="body2"
+                      textAlign={"left"}
+                      className={classes.para}
+                      fontWeight={500}
+                      fontSize={12}
+                      color={"#757575"}
+                    >
+                      Percent:
+                    </Typography>
                     <Input
                       disableUnderline
                       fullWidth
                       placeholder="10"
                       style={{ fontSize: 22, fontWeight: 600 }}
                     />
+                  </Grid>
+                </Grid>
+                <Box display={"flex"} justifyContent="space-around" mt={2}>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      textAlign={"center"}
+                      className={classes.para}
+                      fontWeight={500}
+                      fontSize={14}
+                      color={"#454545"}
+                    >
+                      <strong>Your Buy Orders</strong>
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      textAlign={"center"}
+                      className={classes.para}
+                      fontWeight={500}
+                      fontSize={12}
+                      color={"#757575"}
+                    >
+                      2326, 2053,1856
+                    </Typography>
                   </Box>
-                </Grid>
-                <Grid item md={6} style={{ paddingLeft: 10 }}>
-                  <Typography
-                    variant="body2"
-                    textAlign={"left"}
-                    className={classes.para}
-                    fontWeight={500}
-                    fontSize={12}
-                    color={"#757575"}
-                  >
-                    Percent:
-                  </Typography>
-                  <Input
-                    disableUnderline
-                    fullWidth
-                    placeholder="10"
-                    style={{ fontSize: 22, fontWeight: 600 }}
-                  />
-                </Grid>
-              </Grid>
-              <Box display={"flex"} justifyContent="space-around" mt={2}>
-                <Box>
-                  <Typography
-                    variant="body2"
-                    textAlign={"center"}
-                    className={classes.para}
-                    fontWeight={500}
-                    fontSize={14}
-                    color={"#454545"}
-                  >
-                    <strong>Your Buy Orders</strong>
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    textAlign={"center"}
-                    className={classes.para}
-                    fontWeight={500}
-                    fontSize={12}
-                    color={"#757575"}
-                  >
-                    2326, 2053,1856
-                  </Typography>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      textAlign={"center"}
+                      className={classes.para}
+                      fontWeight={500}
+                      fontSize={14}
+                      color={"#454545"}
+                    >
+                      <strong>Your Sell Orders</strong>
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      textAlign={"center"}
+                      className={classes.para}
+                      fontWeight={500}
+                      fontSize={12}
+                      color={"#757575"}
+                    >
+                      2637, 2970,3246
+                    </Typography>
+                  </Box>
                 </Box>
-                <Box>
-                  <Typography
-                    variant="body2"
-                    textAlign={"center"}
-                    className={classes.para}
-                    fontWeight={500}
-                    fontSize={14}
-                    color={"#454545"}
-                  >
-                    <strong>Your Sell Orders</strong>
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    textAlign={"center"}
-                    className={classes.para}
-                    fontWeight={500}
-                    fontSize={12}
-                    color={"#757575"}
-                  >
-                    2637, 2970,3246
-                  </Typography>
-                </Box>
-              </Box>
 
-              <div className="text-center">
-                <button className={classes.connectButton} onClick={logout}>
-                  STAKE NOW
-                </button>
+                <div className="text-center">
+                  <button className={classes.connectButton} onClick={logout}>
+                    STAKE NOW
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {txCase > 0 && <TxPopup txCase={txCase} resetPopup={resetPopup} />}
         </div>
       </div>{" "}
     </Dialog>

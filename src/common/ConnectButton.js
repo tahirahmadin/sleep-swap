@@ -1,8 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
-import { Box, Button, Slide, Backdrop, useTheme, Dialog } from "@mui/material";
-import { useMoralis, useChain } from "react-moralis";
+import {
+  Box,
+  Button,
+  Slide,
+  Backdrop,
+  useTheme,
+  Dialog,
+  CircularProgress,
+} from "@mui/material";
+import { useMoralis, useChain, useMoralisWeb3Api } from "react-moralis";
 import AccountPopup from "./AccountPopup";
+import Web3 from "web3";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -59,6 +68,7 @@ const useStyles = makeStyles((theme) => ({
 
   loginButton: {
     color: "white",
+    minWidth: 160,
     backgroundColor: theme.palette.primary.main,
     padding: "7px 15px 7px 15px",
     border: "none",
@@ -89,11 +99,6 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       background: "#e5e5e5",
     },
-    [theme.breakpoints.down("sm")]: {
-      marginRight: 0,
-      marginLeft: 15,
-      width: 150,
-    },
   },
   connectedAddress: {
     backgroundColor: theme.palette.primary.light,
@@ -118,17 +123,45 @@ export default function ConnectButton() {
   const classes = useStyles();
   const theme = useTheme();
 
-  const [whitelistPopup, setWhitelistPopup] = React.useState(false);
+  const [balancePopup, setBalancePopup] = React.useState(false);
 
-  const { authenticate, isAuthenticated, isAuthenticating, user, enableWeb3 } =
-    useMoralis();
+  const {
+    authenticate,
+    isAuthenticated,
+    isAuthenticating,
+    user,
+    enableWeb3,
+    start,
+    isInitialized,
+  } = useMoralis();
 
   const { switchNetwork, chainId, chain, account } = useChain();
+
+  const Web3Api = useMoralisWeb3Api();
+  const userAddress = user ? user.attributes.ethAddress : "...";
 
   const changeNetwork = async () => {
     enableWeb3();
     switchNetwork("0x13881");
   };
+
+  const [balance, setBalance] = useState(0);
+
+  useEffect(() => {
+    if (isInitialized) {
+      fetchBalance();
+    }
+  }, [isInitialized]);
+
+  const fetchBalance = async () => {
+    const result = await Web3Api.account.getNativeBalance({
+      network: "mumbai",
+    });
+    let bal = Web3.utils.fromWei(result.balance.toString(), "ether");
+    setBalance(parseFloat(bal).toFixed(3));
+    return bal;
+  };
+
   //   if (chainId != "80001") {
   //     return (
   //       <div>
@@ -142,23 +175,48 @@ export default function ConnectButton() {
       <div>
         <button
           className={classes.loginButton}
-          isLoading={isAuthenticating}
           onClick={() =>
             authenticate({ signingMessage: "YeildSwap Authentication" })
           }
         >
-          Connect Wallet
+          {isAuthenticating ? (
+            <span>
+              {" "}
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <CircularProgress
+                  color="info"
+                  size={25}
+                  style={{ marginRight: 15 }}
+                />{" "}
+              </Box>
+            </span>
+          ) : (
+            "  Connect Wallet"
+          )}
         </button>
       </div>
     );
   }
 
+  const enableBalancePopup = () => {
+    setBalancePopup(true);
+  };
   return (
     <div>
       <Box mb={3} mt={3}>
-        <button
-          onClick={() => setWhitelistPopup(!whitelistPopup)}
-          className={classes.connectedButton}
+        <Button
+          onClick={enableBalancePopup}
+          style={{
+            color: "white",
+            padding: "3px 5px 3px 10px",
+            border: "none",
+            borderRadius: 10,
+            fontWeight: 400,
+            letterSpacing: 0.4,
+            textTransform: "none",
+            fontSize: 15,
+            background: "#eeeeee",
+          }}
         >
           <span
             style={{
@@ -171,15 +229,18 @@ export default function ConnectButton() {
               color: "#414141",
               textAlign: "center",
               lineHeight: 1.5,
+              paddingRight: 10,
             }}
           >
-            3.65 MATIC
+            {balance} MATIC
           </span>{" "}
-          <span className={classes.connectedAddress}>0x98..32342</span>
-        </button>
+          <span className={classes.connectedAddress}>
+            {userAddress.slice(0, 4)}...{userAddress.slice(-4)}
+          </span>
+        </Button>
       </Box>
       <Dialog
-        open={whitelistPopup}
+        open={balancePopup}
         TransitionComponent={Transition}
         keepMounted={false}
         onClose={null}
@@ -191,7 +252,7 @@ export default function ConnectButton() {
         maxWidth="lg"
         fullWidth={false}
       >
-        <AccountPopup setWhitelistPopup={setWhitelistPopup} />
+        <AccountPopup setBalancePopup={setBalancePopup} />
       </Dialog>
     </div>
   );

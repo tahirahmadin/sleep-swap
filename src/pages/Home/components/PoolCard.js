@@ -89,6 +89,7 @@ export default function PoolCard() {
   const theme = useTheme();
 
   const [stakePopup, setStakePopup] = useState(false);
+  const [txCase, setTxCase] = useState(0);
 
   return (
     <Box>
@@ -251,7 +252,11 @@ export default function PoolCard() {
           </Box>
         </Box>
       </div>
-      <StakePopup setStakePopup={setStakePopup} stakePopup={stakePopup} />
+      <StakePopup
+        txCase={txCase}
+        setStakePopup={setStakePopup}
+        stakePopup={stakePopup}
+      />
     </Box>
   );
 }
