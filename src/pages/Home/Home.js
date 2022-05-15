@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover,contain",
     height: "88vh",
     width: "100%",
-    paddingTop: "4%",
+    paddingTop: "2%",
   },
   mainHeading: {
     fontWeight: 600,
@@ -108,13 +108,37 @@ export default function Home() {
           Stake. Sleep. <span style={{ color: "#6A55EA" }}> Repeat.</span>
         </h1>
         <Typography variant="body2" className={classes.para}>
-          Experience first decentralized smart strategy trading interface
+          Experience first decentralized smart strategy trading interface{" "}
         </Typography>
+        <div className="mt-3">
+          <Typography
+            variant="h6"
+            className={classes.para}
+            style={{ fontSize: 13 }}
+          >
+            Powered By
+          </Typography>
+        </div>
+        <div className="d-flex justify-content-center">
+          <div style={{ marginRight: 10 }}>
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Chainlink_Logo_Blue.svg/2560px-Chainlink_Logo_Blue.svg.png"
+              height="20px"
+            />
+          </div>
+
+          <div style={{ marginLeft: 10 }}>
+            <img
+              src="https://stakehound.com/wp-content/uploads/2021/04/Polygon-logo.png"
+              height="18px"
+            />
+          </div>
+        </div>
 
         <Container style={{ marginTop: 40 }}>
           <div className="text-center"></div>
           <h6 variant="h1" className={classes.poolText}>
-            Available Strategies
+            Available Pools
           </h6>
           <Grid container>
             <Grid item md={4}>
