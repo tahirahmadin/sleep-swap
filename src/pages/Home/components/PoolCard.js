@@ -108,7 +108,7 @@ export default function PoolCard() {
               alignItems="center"
             >
               <img
-                src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
+                src="https://cdn3d.iconscout.com/3d/premium/thumb/chainlink-coin-4199896-3478982@0.png"
                 alt="Polygon"
                 height="20px"
               />{" "}
