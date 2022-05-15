@@ -162,7 +162,7 @@ const Appbar = ({ requestChalleng }) => {
             </Box>
             <Box display="flex" justifyContent="flex-end" alignItems="center">
               <div style={{ padding: 3, paddingRight: 10 }}>
-                <Avatar src="https://mui.com/static/images/avatar/2.jpg" />{" "}
+                <Avatar src="https://cdn3d.iconscout.com/3d/premium/thumb/notification-bell-4730505-3934029.png" />{" "}
               </div>
               <ConnectButton />
             </Box>
