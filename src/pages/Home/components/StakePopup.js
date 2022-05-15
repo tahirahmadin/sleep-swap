@@ -144,6 +144,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 600,
     marginTop: 20,
     padding: "10px 40px 10px 40px",
+    fontFamily: "poppins",
     "&:hover": {
       background: theme.palette.primary.main,
     },
@@ -214,14 +215,14 @@ const useStyles = makeStyles((theme) => ({
 const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
   const classes = useStyles();
 
-  const { user, logout } = useMoralis();
+  const { user, logout, isAuthenticated } = useMoralis();
 
   const Web3Api = useMoralisWeb3Api();
   const userAddress = user ? user.attributes.ethAddress : "...";
 
   const [amount, setAmount] = useState(0);
-  const [percent, setPercent] = useState(0);
-  const [grids, setGrids] = useState(0);
+  const [percent, setPercent] = useState(1);
+  const [grids, setGrids] = useState(2);
 
   const resetPopup = () => {
     setStakePopup(false);
@@ -253,6 +254,25 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
   function valuetext(value) {
     return `${value}°C`;
   }
+
+  const handlePercentage = (event) => {
+    let { value } = event.target;
+    let min = 1;
+    let max = 99;
+    value = Math.max(Number(min), Math.min(Number(max), Number(value)));
+
+    setPercent(value);
+  };
+  const handleGrids = (event) => {
+    let { value } = event.target;
+    let min = 1;
+    let max = 25;
+    value = Math.max(Number(min), Math.min(Number(max), Number(value)));
+
+    setGrids(value);
+  };
+
+  const stakeFunds = () => {};
   return (
     <Dialog
       open={stakePopup}
@@ -390,55 +410,18 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
                     </Box>
                   </Box>
                 </Box>
-                <Box
-                  mt={2}
-                  style={{
-                    border: "1px solid rgba(106, 85, 234,0.2)",
-                    padding: "6px 30px 6px 30px",
-                    borderRadius: 10,
-                    backgroundColor: "rgba(106, 85, 234,0.03)",
-                  }}
-                >
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      textAlign={"left"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={12}
-                      color={"#757575"}
-                    >
-                      Grids:
-                    </Typography>
-                    <Slider
-                      defaultValue={10}
-                      getAriaValueText={valuetext}
-                      step={null}
-                      marks={marks}
-                      fullWidth
-                    />
-                  </Box>
-                </Box>
-                <Box></Box>
-                <Grid
-                  container
-                  display={"flex"}
-                  justifyContent={"space-between"}
-                  mt={2}
-                  style={{
-                    border: "1px solid rgba(106, 85, 234,0.2)",
-                    padding: "6px 30px 6px 30px",
-                    borderRadius: 10,
-                    backgroundColor: "rgba(106, 85, 234,0.03)",
-                  }}
-                >
-                  <Grid item md={6} style={{ paddingRight: 10 }}>
-                    <Box
-                      style={{
-                        borderRight: "1px solid #e5e5e5",
-                        paddingRight: 10,
-                      }}
-                    >
+                <div className="d-flex">
+                  <Box
+                    mt={2}
+                    style={{
+                      width: "50%",
+                      border: "1px solid rgba(106, 85, 234,0.2)",
+                      padding: "6px 15px 6px 15px",
+                      borderRadius: 10,
+                      backgroundColor: "rgba(106, 85, 234,0.03)",
+                    }}
+                  >
+                    <Box>
                       <Typography
                         variant="body2"
                         textAlign={"left"}
@@ -449,15 +432,27 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
                       >
                         Grids:
                       </Typography>
-                      <Input
-                        disableUnderline
+                      <Slider
+                        defaultValue={10}
+                        getAriaValueText={valuetext}
+                        step={null}
+                        marks={marks}
                         fullWidth
-                        placeholder="10"
-                        style={{ fontSize: 22, fontWeight: 600 }}
+                        onChange={(e) => handleGrids(e)}
                       />
                     </Box>
-                  </Grid>
-                  <Grid item md={6} style={{ paddingLeft: 10 }}>
+                  </Box>
+                  <Box
+                    ml={1}
+                    mt={2}
+                    style={{
+                      width: "50%",
+                      border: "1px solid rgba(106, 85, 234,0.2)",
+                      padding: "6px 30px 6px 30px",
+                      borderRadius: 10,
+                      backgroundColor: "rgba(106, 85, 234,0.03)",
+                    }}
+                  >
                     <Typography
                       variant="body2"
                       textAlign={"left"}
@@ -466,16 +461,20 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
                       fontSize={12}
                       color={"#757575"}
                     >
-                      Percent:
+                      Trigger Percent:
                     </Typography>
                     <Input
+                      type="number"
                       disableUnderline
                       fullWidth
                       placeholder="10"
+                      value={percent}
+                      onChange={(e) => handlePercentage(e)}
                       style={{ fontSize: 22, fontWeight: 600 }}
                     />
-                  </Grid>
-                </Grid>
+                  </Box>
+                </div>
+
                 <Box display={"flex"} justifyContent="space-around" mt={2}>
                   <Box>
                     <Typography
@@ -524,7 +523,10 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
                 </Box>
 
                 <div className="text-center">
-                  <button className={classes.connectButton} onClick={logout}>
+                  <button
+                    className={classes.connectButton}
+                    onClick={stakeFunds}
+                  >
                     STAKE NOW
                   </button>
                 </div>

@@ -25,6 +25,9 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: "5%",
     backgroundColor: "#6A55EA",
     borderRadius: 20,
+    "&:hover": {
+      boxShadow: "0px 24px 33px -9px #0000005C",
+    },
   },
   heading: {
     fontWeight: 600,
@@ -77,6 +80,7 @@ const useStyles = makeStyles((theme) => ({
     letterSpacing: 0.4,
     textTransform: "none",
     fontSize: 15,
+    fontFamily: "poppins",
     "&:hover": {
       background: theme.palette.primary.light,
     },
@@ -96,6 +100,7 @@ const useStyles = makeStyles((theme) => ({
     letterSpacing: 0.4,
     textTransform: "none",
     fontSize: 15,
+    fontFamily: "poppins",
     "&:hover": {
       background: "#e5e5e5",
     },

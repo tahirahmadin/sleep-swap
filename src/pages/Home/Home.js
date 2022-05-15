@@ -104,9 +104,9 @@ export default function Home() {
   return (
     <Box>
       <Box className={classes.background}>
-        <h1 variant="h1" className={classes.mainHeading}>
-          Stake. Sleep. <span style={{ color: "#6A55EA" }}> Repeat.</span>
-        </h1>
+        <h3 variant="h1" className={classes.mainHeading}>
+          Stake. Sleep. <span style={{ color: "#6227B9" }}> Repeat.</span>
+        </h3>
         <Typography variant="body2" className={classes.para}>
           Experience first decentralized smart strategy trading interface{" "}
         </Typography>

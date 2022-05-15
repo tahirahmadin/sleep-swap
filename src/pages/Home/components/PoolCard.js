@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import StakePopup from "./StakePopup";
+import { useMoralis } from "react-moralis";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -74,6 +75,9 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#FFFFFF",
     boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
     borderRadius: 10,
+    "&:hover": {
+      boxShadow: "0px 24px 33px -9px #0000005C",
+    },
   },
   cardTitle: {
     fontWeight: 400,
@@ -87,6 +91,8 @@ const useStyles = makeStyles((theme) => ({
 export default function PoolCard() {
   const classes = useStyles();
   const theme = useTheme();
+
+  const { isAuthenticated } = useMoralis();
 
   const [stakePopup, setStakePopup] = useState(false);
   const [txCase, setTxCase] = useState(0);
@@ -239,10 +245,10 @@ export default function PoolCard() {
           </Box>
           <Box px={2} mt={2} className="text-center">
             <Button
-              onClick={() => setStakePopup(true)}
+              onClick={isAuthenticated ? () => setStakePopup(true) : null}
               style={{
                 borderRadius: 10,
-                background: "#6A55EA",
+                background: "#6227B9",
                 padding: "9px 20px 9px 20px",
                 color: "white",
               }}

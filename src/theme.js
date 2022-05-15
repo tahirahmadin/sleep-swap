@@ -7,7 +7,7 @@ let themes = createTheme({
       disabledBackground: "rgba(106, 85, 234,0.6)",
     },
     primary: {
-      main: "#6A55EA",
+      main: "#6227B9",
       hover: "rgba(70, 56, 160,1)",
     },
     text: {
@@ -16,7 +16,7 @@ let themes = createTheme({
       secondary: "#414141",
     },
     background: {
-      main: "#6A55EA",
+      main: "#6227B9",
       light: "rgba(106, 85, 234,0.6)",
     },
   },

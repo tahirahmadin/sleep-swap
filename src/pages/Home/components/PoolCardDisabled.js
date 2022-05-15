@@ -86,6 +86,9 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#FFFFFF",
     boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
     borderRadius: 10,
+    "&:hover": {
+      boxShadow: "0px 24px 33px -9px #0000005C",
+    },
   },
   cardTitle: {
     fontWeight: 400,
