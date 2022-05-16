@@ -1,5 +1,5 @@
 //done
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -16,6 +16,9 @@ import { Close } from "@mui/icons-material";
 import { useMoralis, useMoralisWeb3Api } from "react-moralis";
 import Web3 from "web3";
 import TxPopup from "../../../common/TxPopup";
+import { useUserTrade } from "../../../hooks/useUserTrade";
+import { toWei } from "../../../utils/helper";
+import BigNumber from "bignumber.js";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -212,7 +215,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
+const StakePopup = ({
+  txCase,
+  stakePopup,
+  setStakePopup,
+  poolToken,
+  ethToken,
+}) => {
   const classes = useStyles();
 
   const { user, logout, isAuthenticated } = useMoralis();
@@ -220,13 +229,27 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
   const Web3Api = useMoralisWeb3Api();
   const userAddress = user ? user.attributes.ethAddress : "...";
 
-  const [amount, setAmount] = useState(0);
-  const [percent, setPercent] = useState(1);
-  const [grids, setGrids] = useState(2);
+  const [userStaked, userTradeSettings, startTradeOrder] = useUserTrade(
+    poolToken.address
+  );
+
+  const [amount, setAmount] = useState("");
+  const [percent, setPercent] = useState("");
+  const [grids, setGrids] = useState("");
 
   const resetPopup = () => {
     setStakePopup(false);
   };
+
+  const handleStake = useCallback(() => {
+    console.log("calling trade callback", amount);
+    if (new BigNumber(toWei(amount, poolToken.decimals)).lte(0)) {
+      return;
+    }
+
+    console.log("calling trade callback", toWei(amount, poolToken.decimals));
+    startTradeOrder(toWei(amount, poolToken.decimals));
+  }, [amount, startTradeOrder]);
 
   const marks = [
     {
@@ -362,7 +385,8 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
                       Amount:
                     </Typography>
                     <Input
-                      disableUnderline
+                      value={amount}
+                      onInput={(event) => setAmount(event.target.value)}
                       fullWidth
                       placeholder="0"
                       style={{ fontSize: 24, fontWeight: 600 }}
@@ -410,18 +434,55 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
                     </Box>
                   </Box>
                 </Box>
-                <div className="d-flex">
-                  <Box
-                    mt={2}
-                    style={{
-                      width: "50%",
-                      border: "1px solid rgba(106, 85, 234,0.2)",
-                      padding: "6px 15px 6px 15px",
-                      borderRadius: 10,
-                      backgroundColor: "rgba(106, 85, 234,0.03)",
-                    }}
-                  >
-                    <Box>
+                <Box
+                  mt={2}
+                  style={{
+                    border: "1px solid rgba(106, 85, 234,0.2)",
+                    padding: "6px 30px 6px 30px",
+                    borderRadius: 10,
+                    backgroundColor: "rgba(106, 85, 234,0.03)",
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      textAlign={"left"}
+                      className={classes.para}
+                      fontWeight={500}
+                      fontSize={12}
+                      color={"#757575"}
+                    >
+                      Grids:
+                    </Typography>
+                    <Slider
+                      defaultValue={userTradeSettings?.grids}
+                      getAriaValueText={valuetext}
+                      step={null}
+                      marks={marks}
+                      fullWidth
+                    />
+                  </Box>
+                </Box>
+                <Box></Box>
+                <Grid
+                  container
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  mt={2}
+                  style={{
+                    border: "1px solid rgba(106, 85, 234,0.2)",
+                    padding: "6px 30px 6px 30px",
+                    borderRadius: 10,
+                    backgroundColor: "rgba(106, 85, 234,0.03)",
+                  }}
+                >
+                  <Grid item md={6} style={{ paddingRight: 10 }}>
+                    <Box
+                      style={{
+                        borderRight: "1px solid #e5e5e5",
+                        paddingRight: 10,
+                      }}
+                    >
                       <Typography
                         variant="body2"
                         textAlign={"left"}
@@ -432,11 +493,8 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
                       >
                         Grids:
                       </Typography>
-                      <Slider
-                        defaultValue={10}
-                        getAriaValueText={valuetext}
-                        step={null}
-                        marks={marks}
+                      <Input
+                        value={userTradeSettings?.grids}
                         fullWidth
                         onChange={(e) => handleGrids(e)}
                       />
@@ -466,6 +524,7 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
                     <Input
                       type="number"
                       disableUnderline
+                      value={userTradeSettings?.buyThresold}
                       fullWidth
                       placeholder="10"
                       value={percent}
@@ -525,7 +584,7 @@ const StakePopup = ({ txCase, stakePopup, setStakePopup }) => {
                 <div className="text-center">
                   <button
                     className={classes.connectButton}
-                    onClick={stakeFunds}
+                    onClick={handleStake}
                   >
                     STAKE NOW
                   </button>

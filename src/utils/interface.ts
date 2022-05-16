@@ -7,15 +7,27 @@ export interface Token {
 }
 
 export interface PoolInfo {
-  apy: string;
-  staked: string;
-  claimed: string;
+  totalEthInPool: string; // total usdt deposits
+  totalFee: string; // total eth reserve
+  totalUsdtInPool: string;
+  totalOrders: string;
+  averageGain: string | undefined;
+  ethPriceUsd: string;
+}
+
+export interface UserTradeSettings {
+  grids: number;
+  sellThresold: number;
+  buyThresold: number;
 }
 
 export interface UserStakedInfo {
   staked: string;
-  claimed: string;
-  pending: string;
+  earnings: string;
+  usdtBalance: string;
+  tokenBalance: string;
+  buyOrderAmount: string;
+  sellOrderAmount: string;
 }
 
 export interface TransactionStatus {

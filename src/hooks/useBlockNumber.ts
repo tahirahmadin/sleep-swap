@@ -72,3 +72,22 @@ export default function useBlockNumber(): number | undefined {
 export function useFastForwardBlockNumber(): (block: number) => void {
   return useUpdateAtom(blockAtom);
 }
+
+// const fetchBlock = async () => {
+//   const options: any = { chain: "polygon", block_number_or_hash: "2" };
+//   const result = await Web3Api.native.getBlock(options);
+//   // let result = { number: "1" };
+//   console.log("block fetched", result);
+//   // onBlock();
+//   // setState({ block: parseInt(result.number) });
+// };
+
+// useEffect(() => {
+//   if (!chainId) {
+//     return;
+//   }
+
+//   setInterval(async () => {
+//     await fetchBlock();
+//   }, 2000);
+// }, [chainId]);

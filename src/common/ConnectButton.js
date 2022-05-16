@@ -138,6 +138,7 @@ export default function ConnectButton() {
     enableWeb3,
     start,
     isInitialized,
+    Moralis,
   } = useMoralis();
 
   const { switchNetwork, chainId, chain, account } = useChain();
@@ -160,9 +161,11 @@ export default function ConnectButton() {
 
   const fetchBalance = async () => {
     const result = await Web3Api.account.getNativeBalance({
-      network: "mumbai",
+      network: "kovan",
+      chain: "kovan",
     });
-    let bal = Web3.utils.fromWei(result.balance.toString(), "ether");
+
+    let bal = Moralis.Units.FromWei(result.balance); //Web3.utils.fromWei(result.balance.toString(), "ether");
     setBalance(parseFloat(bal).toFixed(3));
     return bal;
   };

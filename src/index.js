@@ -11,19 +11,26 @@ import { Provider } from "react-redux";
 import MulticallUpdater from "./state/multicall/updater";
 import { BlockUpdater } from "./hooks/useBlockNumber";
 
+import { MoralisProvider } from "react-moralis";
+
+const applicationId = "WCJyTcbMoLK1YCm39SV7XTB6kRZuMw7gf0IbF2Dd";
+const serverUrl = "https://tubezrrbvi7q.usemoralis.com:2053/server";
+
 const Web3ProviderNetwork = createWeb3ReactRoot(NetworkContextName);
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <Web3ReactProvider getLibrary={getLibrary}>
-        <Web3ProviderNetwork getLibrary={getLibrary}>
-          <MulticallUpdater />
-          <BlockUpdater />
-          <App />
-        </Web3ProviderNetwork>
-      </Web3ReactProvider>
-    </Provider>
+    <MoralisProvider appId={applicationId} serverUrl={serverUrl}>
+      <Provider store={store}>
+        <Web3ReactProvider getLibrary={getLibrary}>
+          <Web3ProviderNetwork getLibrary={getLibrary}>
+            <MulticallUpdater />
+            <BlockUpdater />
+            <App />
+          </Web3ProviderNetwork>
+        </Web3ReactProvider>
+      </Provider>
+    </MoralisProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );

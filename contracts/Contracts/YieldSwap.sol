@@ -28,8 +28,9 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
 
     struct UserInfo {
         address userAddress;
-        uint256 tokenBalance; // eth
-        uint256 fiatBalance; // usdt
+        uint256 totalStaked; // usdt amount user added initially
+        uint256 tokenBalance; // current eth balance
+        uint256 fiatBalance; // current usdt balance
         uint256 fiatAmountForEachOrder;
         uint256 ethAmountForEachOrder;
         uint256 depositTimeStamp;
@@ -42,7 +43,11 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     //list of order prices for each user
     uint256[] public orderPrices;
 
-    mapping(uint256 => address) orderUsers;
+    mapping(uint256 => address) orderUsers; // mapping of orders to it's corresponding user's address
+
+    mapping(address => uint256) userOrders; // mapping of user address to it's current order index
+
+    mapping(uint256 => int256) orderStatus; // 0: active, 1 : completed, -1: cancelled ( if user withdraw funds before completion )
 
     // current buy and sell counts of each index [2, 5] exp: 2 buy and 5 sells executed
     mapping(uint256 => uint256[]) orderCurrentBuySellGridCounts;
@@ -228,6 +233,8 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         user.depositTimeStamp = block.timestamp;
         user.lastEthPrice = ethPriceInUSD;
 
+        user.totalStaked = _tokenAmount;
+
         if (stakers[msg.sender] != true) {
             user.userAddress = msg.sender;
             stakers[msg.sender] = true;
@@ -236,20 +243,50 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
 
         // configure ordre and mappings start
         orderPrices.push(ethPriceInUSD);
-        uint256 currenIndex = orderPrices.length - 1;
+        uint256 orderIndex = orderPrices.length - 1;
 
-        orderCurrentBuySellGridCounts[currenIndex] = [0, 0];
+        orderCurrentBuySellGridCounts[orderIndex] = [0, 0];
 
-        orderUsers[currenIndex] = msg.sender;
+        orderUsers[orderIndex] = msg.sender;
+
+        userOrders[msg.sender] = orderIndex;
+
+        orderStatus[orderIndex] = 0;
         // configure order and mappings end
 
         emit StartYieldSwap(msg.sender, _tokenAmount);
+    }
+
+    function getPoolInfo()
+        public
+        view
+        returns (
+            uint256 _totalEthReserve,
+            uint256 _totalFee,
+            uint256 _totalUsdt,
+            uint256 _totalOrders,
+            uint256 _ethPrice
+        )
+    {
+        _totalEthReserve = totalEthInPool;
+        _totalFee = totalFee;
+        _totalUsdt = totalUsdtInPool;
+        _totalOrders = orderQue.length;
+        _ethPrice = getEthPriceUsd();
+        return (
+            _totalEthReserve,
+            _totalFee,
+            _totalUsdt,
+            _totalOrders,
+            _ethPrice
+        );
     }
 
     function getUserInfo(address _account)
         public
         view
         returns (
+            uint256 _totalStaked,
             uint256 _tokenBalance,
             uint256 _fiatBalance,
             uint256 totalUsdValue,
@@ -259,6 +296,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         )
     {
         UserInfo storage user = users[_account];
+        _totalStaked = user.totalStaked;
         _tokenBalance = user.tokenBalance;
         _fiatBalance = user.fiatBalance;
 
@@ -269,6 +307,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         _ethOrderAmount = user.ethAmountForEachOrder;
         _ethPrice = user.lastEthPrice;
         return (
+            _totalStaked,
             _tokenBalance,
             _fiatBalance,
             totalUsdValue,
@@ -315,11 +354,18 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
 
         IERC20(_token).transfer(msg.sender, userUsdt);
 
-        user.tokenBalance -= userEth;
-        user.fiatBalance -= userUsdt;
+        user.tokenBalance = 0;
+        user.fiatBalance = 0;
 
         user.ethAmountForEachOrder = 0;
         user.fiatAmountForEachOrder = 0;
+
+        user.totalStaked = 0;
+
+        uint256 userOrderIndex = userOrders[msg.sender];
+        if (orderStatus[userOrderIndex] == 0) {
+            orderStatus[userOrderIndex] = -1;
+        }
 
         emit WithdrawUserFunds(msg.sender, userEth, userUsdt);
     }
@@ -339,6 +385,11 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         uint256[] memory _orderGridStatus = orderCurrentBuySellGridCounts[
             _orderIndex
         ];
+
+        require(
+            orderStatus[_orderIndex] == 0,
+            "Order is either completed or cancelled"
+        );
 
         if (orderTypes[_orderIndex] == 0) {
             // run buy order
@@ -443,6 +494,8 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     function runOrders(uint256 ethPrice) public {
         uint256 ordersToRun;
         uint256 orderQueLength = orderQue.length - lastOrderIndexExecuted;
+        require(orderQueLength > 0, "Order que is empty");
+
         if (orderQueLength > 10) {
             ordersToRun = 10;
         } else {

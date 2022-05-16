@@ -4,6 +4,7 @@ const initalState = {
   jwtToken: null,
   sign_message: null,
   user: null,
+  tradeSettings: { grids: 5, sellThresold: 10, buyThresold: 10 },
 };
 
 export default function (state = initalState, action) {
