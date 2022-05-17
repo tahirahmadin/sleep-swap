@@ -1,8 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import StakePopup from "./StakePopup";
 import { useMoralis } from "react-moralis";
+import { TOKENS } from "../../../constants";
+import { useChain } from "react-moralis";
+import { useTokenAllowance } from "../../../hooks/useAllowance";
+import { useUserTrade } from "../../../hooks/useUserTrade";
+import { fromWei } from "../../../utils/helper";
+import { usePoolInfo } from "../../../hooks/usePoolInfo";
+import BigNumber from "bignumber.js";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -91,11 +98,42 @@ const useStyles = makeStyles((theme) => ({
 export default function PoolCard() {
   const classes = useStyles();
   const theme = useTheme();
+  const { account } = useChain();
 
   const { isAuthenticated } = useMoralis();
 
   const [stakePopup, setStakePopup] = useState(false);
   const [txCase, setTxCase] = useState(0);
+
+  const poolToken = TOKENS?.["USDT"];
+  const ethToken = TOKENS?.["ETH"];
+
+  const [allowance, confirmAllowance, approvalLoading] = useTokenAllowance(
+    poolToken.address
+  );
+
+  const [userStaked, userTradeSettings] = useUserTrade(poolToken.address);
+  const [poolInfo, poolLoading] = usePoolInfo();
+
+  const totalPoolValueLocked = useMemo(() => {
+    if (!poolInfo) {
+      return "0";
+    }
+    const totalEthUsd = new BigNumber(
+      fromWei(poolInfo?.totalEthInPool, ethToken.decimals)
+    )
+      .plus(fromWei(poolInfo?.totalFee, ethToken.decimals))
+      .multipliedBy(fromWei(poolInfo?.ethPriceUsd, 8));
+
+    return totalEthUsd
+      .plus(fromWei(poolInfo?.totalUsdtInPool, poolToken.decimals))
+      .toFixed(3)
+      .toString();
+  }, [poolInfo]);
+
+  useEffect(() => {
+    console.log("user staked ", userStaked);
+  }, [userStaked]);
 
   return (
     <Box>
@@ -153,7 +191,7 @@ export default function PoolCard() {
                 fontWeight={700}
                 ml={1}
               >
-                $12,320
+                $ {totalPoolValueLocked}
               </Typography>
             </Box>
             <Box>
@@ -174,7 +212,7 @@ export default function PoolCard() {
                 fontWeight={700}
                 ml={1}
               >
-                + 1,436
+                {poolInfo?.averageGain || "0"}
               </Typography>
             </Box>
           </Box>
@@ -208,7 +246,7 @@ export default function PoolCard() {
                 fontWeight={700}
                 ml={1}
               >
-                $1000
+                {fromWei(userStaked?.staked, poolToken.decimals)}
               </Typography>
             </Box>
             <Box
@@ -239,22 +277,36 @@ export default function PoolCard() {
                 fontWeight={700}
                 ml={1}
               >
-                $118
+                {fromWei(userStaked?.earnings, poolToken.decimals)}
               </Typography>
             </Box>
           </Box>
           <Box px={2} mt={2} className="text-center">
-            <Button
-              onClick={isAuthenticated ? () => setStakePopup(true) : null}
-              style={{
-                borderRadius: 10,
-                background: "#6227B9",
-                padding: "9px 20px 9px 20px",
-                color: "white",
-              }}
-            >
-              Start Strategy
-            </Button>
+            {!allowance ? (
+              <Button
+                onClick={() => setStakePopup(true)}
+                style={{
+                  borderRadius: 10,
+                  background: "#6A55EA",
+                  padding: "9px 20px 9px 20px",
+                  color: "white",
+                }}
+              >
+                Start Strategy
+              </Button>
+            ) : (
+              <Button
+                onClick={() => confirmAllowance()}
+                style={{
+                  borderRadius: 10,
+                  background: "#6A55EA",
+                  padding: "9px 20px 9px 20px",
+                  color: "white",
+                }}
+              >
+                {approvalLoading ? "waiting..." : "Approve USDT"}
+              </Button>
+            )}
           </Box>
         </Box>
       </div>
@@ -262,6 +314,8 @@ export default function PoolCard() {
         txCase={txCase}
         setStakePopup={setStakePopup}
         stakePopup={stakePopup}
+        poolToken={poolToken}
+        ethToken={ethToken}
       />
     </Box>
   );

@@ -211,7 +211,8 @@ const AccountPopup = ({ setBalancePopup }) => {
 
   const fetchBalance = async () => {
     const result = await Web3Api.account.getNativeBalance({
-      network: "mumbai",
+      network: "kovan",
+      chain: "kovan",
     });
     console.log(result);
     let bal = Web3.utils.fromWei(result.balance.toString(), "ether");

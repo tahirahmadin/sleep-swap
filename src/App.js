@@ -1,5 +1,5 @@
 import "./App.css";
-import React from "react";
+import React, { useEffect } from "react";
 import theme from "./theme";
 import { Fragment } from "react";
 import Home from "./pages/Home/Home";
@@ -10,24 +10,30 @@ import { Container } from "@mui/material";
 import Footer from "./common/Footer";
 import { Provider } from "react-redux";
 import store from "./store";
-import { MoralisProvider } from "react-moralis";
+import { useMoralis } from "react-moralis";
 
-const applicationId = "WCJyTcbMoLK1YCm39SV7XTB6kRZuMw7gf0IbF2Dd";
-const serverUrl = "https://tubezrrbvi7q.usemoralis.com:2053/server";
 function App() {
+  const { isWeb3Enabled, enableWeb3, isAuthenticated, isWeb3EnableLoading } =
+    useMoralis();
+
+  useEffect(() => {
+    const connectorId = window.localStorage.getItem("connectorId");
+    if (isAuthenticated && !isWeb3Enabled && !isWeb3EnableLoading)
+      enableWeb3({ provider: connectorId });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isWeb3Enabled]);
+
   return (
     <Provider store={store}>
       <ThemeProvider theme={theme}>
-        <MoralisProvider appId={applicationId} serverUrl={serverUrl}>
-          <Fragment>
-            <Router>
-              <Appbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-              </Routes>
-            </Router>
-          </Fragment>
-        </MoralisProvider>
+        <Fragment>
+          <Router>
+            <Appbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+            </Routes>
+          </Router>
+        </Fragment>
       </ThemeProvider>
     </Provider>
   );
