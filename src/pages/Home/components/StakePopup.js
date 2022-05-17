@@ -229,9 +229,13 @@ const StakePopup = ({
   const Web3Api = useMoralisWeb3Api();
   const userAddress = user ? user.attributes.ethAddress : "...";
 
-  const [userStaked, userTradeSettings, startTradeOrder] = useUserTrade(
-    poolToken.address
-  );
+  const [
+    userStaked,
+    userTradeSettings,
+    startTradeOrder,
+    transactionState,
+    resetTrxState,
+  ] = useUserTrade(poolToken.address);
 
   const [amount, setAmount] = useState("");
   const [percent, setPercent] = useState("");
@@ -239,6 +243,7 @@ const StakePopup = ({
 
   const resetPopup = () => {
     setStakePopup(false);
+    resetTrxState();
   };
 
   const handleStake = useCallback(() => {
@@ -312,7 +317,7 @@ const StakePopup = ({
     >
       <div className={classes.background}>
         <div className={classes.container}>
-          {txCase === 0 && (
+          {transactionState?.state === 0 && (
             <div className="h-100 w-100">
               <div className="d-flex justify-content-end" onClick={resetPopup}>
                 <Close style={{ cursor: "pointer" }} />
@@ -591,7 +596,13 @@ const StakePopup = ({
             </div>
           )}
 
-          {txCase > 0 && <TxPopup txCase={txCase} resetPopup={resetPopup} />}
+          {transactionState?.state > 0 && (
+            <TxPopup
+              txCase={transactionState?.state}
+              hash={transactionState?.hash}
+              resetPopup={resetPopup}
+            />
+          )}
         </div>
       </div>{" "}
     </Dialog>

@@ -7,14 +7,12 @@ import { PoolInfo } from "../utils/interface";
 
 export function usePoolInfo(): [PoolInfo | undefined, boolean] {
   // const contract = useTokenContract(token?.address, false);
-  const { chainId, account, chain } = useChain();
+  const { account } = useChain();
   const [poolInfo, setPoolInfo] = useState<PoolInfo | undefined>(undefined); // fetch user trade settings from blockchain and update
 
   const { Moralis } = useMoralis();
   const Web3Api = useMoralisWeb3Api();
   const [poolLoading, setLoading] = useState(false);
-
-  const spender = SLEEP_SWAP_ADDRESSES?.[42];
 
   //Todo: replace this function with graph query when graph ready:
   const fetchPoolInfo = async () => {
@@ -27,7 +25,6 @@ export function usePoolInfo(): [PoolInfo | undefined, boolean] {
     try {
       // Read new value
       const info: any = await Moralis.executeFunction(readOptions);
-      console.log("fetched pool info ", info);
       setPoolInfo({
         totalEthInPool: info?._totalEthReserve?.toString(),
         totalFee: info?._totalFee?.toString(),

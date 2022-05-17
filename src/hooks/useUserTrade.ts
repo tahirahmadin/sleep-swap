@@ -1,19 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import BigNumber from "bignumber.js";
 import { SLEEP_SWAP_ADDRESSES } from "../constants";
 import { useChain, useMoralis, useMoralisWeb3Api } from "react-moralis";
 
-import tokenAbi from "../contracts/abi/erc20.json";
 import sleepAbi from "../contracts/abi/sleepSwap.json";
 import { UserStakedInfo, UserTradeSettings } from "../utils/interface";
 
-export function useUserTrade(
-  token?: string
-):
+export function useUserTrade(token?: string):
   | [
       UserStakedInfo | undefined,
       UserTradeSettings | undefined,
-      (amount: string) => {}
+      (amount: string) => {},
+      {
+        state: number;
+        hash: string | null;
+      },
+      () => void
     ]
   | null {
   // const contract = useTokenContract(token?.address, false);
@@ -27,13 +28,17 @@ export function useUserTrade(
   const { Moralis } = useMoralis();
   const Web3Api = useMoralisWeb3Api();
   const [tradeLoading, setLoading] = useState(false);
+  const [transactionState, setTrxState] = useState<{
+    state: number;
+    hash: string | null;
+  }>({ state: 0, hash: null });
 
   const sleepSwapAddress = SLEEP_SWAP_ADDRESSES?.[42];
   const startTradeOrder = useCallback(
     async (amount: string) => {
       setLoading(true);
       try {
-        console.log("starting order");
+        setTrxState({ state: 1, hash: null });
         const sendOptions: any = {
           contractAddress: sleepSwapAddress,
           functionName: "startYieldSwap",
@@ -44,19 +49,25 @@ export function useUserTrade(
             ethPriceInUSD: 200000000000, // temp params for testing only
           },
         };
-        console.log("options ", sendOptions);
         const transaction: any = await Moralis.executeFunction(sendOptions);
         console.log(transaction.hash);
+        setTrxState({ state: 2, hash: transaction.hash });
 
         await transaction?.wait();
         console.log(transaction);
+        setTrxState({ hash: transaction.hash, state: 3 });
       } catch (error) {
         console.log("update trade  error ", { error });
+        setTrxState({ ...transactionState, state: 4 });
       }
       setLoading(false);
     },
     [chainId]
   );
+
+  const resetTrxState = useCallback(() => {
+    setTrxState({ state: 0, hash: null });
+  }, []);
 
   const fetchUserTradeSettings = async () => {
     const readOptions: any = {
@@ -116,7 +127,13 @@ export function useUserTrade(
   }, [account, account, token]);
 
   return useMemo(
-    () => [userTradeInfo, userTradeSettings, startTradeOrder],
-    [token, userTradeInfo, userTradeSettings]
+    () => [
+      userTradeInfo,
+      userTradeSettings,
+      startTradeOrder,
+      transactionState,
+      resetTrxState,
+    ],
+    [token, userTradeInfo, userTradeSettings, transactionState, resetTrxState]
   );
 }

@@ -1,20 +1,8 @@
 //done
-import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Dialog,
-  Typography,
-  Slide,
-  Backdrop,
-  Box,
-  Input,
-  Grid,
-  Slider,
-} from "@mui/material";
+import React from "react";
+import { Typography, Slide } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { Close } from "@mui/icons-material";
-import { useMoralis, useMoralisWeb3Api } from "react-moralis";
-import Web3 from "web3";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -209,10 +197,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TxPopup = ({ txCase, resetPopup }) => {
+const TxPopup = ({ txCase, hash, resetPopup }) => {
   const classes = useStyles();
-
-  const { user, logout } = useMoralis();
 
   return (
     <div className="h-100 w-100">
@@ -301,9 +287,13 @@ const TxPopup = ({ txCase, resetPopup }) => {
             </div>
 
             <div className="text-center mt-2">
-              <button className={classes.explorerButton} onClick={logout}>
+              <a
+                className={classes.explorerButton}
+                href={`https://kovan.etherscan.io/tx/${hash}`}
+                target="_blank"
+              >
                 View On Explorer
-              </button>
+              </a>
             </div>
           </div>
           <div></div>
@@ -349,9 +339,13 @@ const TxPopup = ({ txCase, resetPopup }) => {
             </div>
 
             <div className="text-center mt-2">
-              <button className={classes.explorerButton} onClick={logout}>
+              <a
+                className={classes.explorerButton}
+                href={`https://kovan.etherscan.io/tx/${hash}`}
+                target="_blank"
+              >
                 View On Explorer
-              </button>
+              </a>
             </div>
           </div>
           <div></div>
@@ -397,9 +391,13 @@ const TxPopup = ({ txCase, resetPopup }) => {
             </div>
 
             <div className="text-center mt-2">
-              <button className={classes.explorerButton} onClick={logout}>
+              <a
+                className={classes.explorerButton}
+                href={`https://kovan.etherscan.io/tx/${hash}`}
+                target="_blank"
+              >
                 View On Explorer
-              </button>
+              </a>
             </div>
           </div>
           <div></div>
