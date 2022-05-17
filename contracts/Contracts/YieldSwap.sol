@@ -233,7 +233,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         user.depositTimeStamp = block.timestamp;
         user.lastEthPrice = ethPriceInUSD;
 
-        user.totalStaked = _tokenAmount;
+        user.totalStaked += _tokenAmount;
 
         if (stakers[msg.sender] != true) {
             user.userAddress = msg.sender;
@@ -346,12 +346,13 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     function withdrawUserFunds(address _token) public {
         UserInfo storage user = users[msg.sender];
 
-        uint256 userUsdt = user.fiatBalance;
         uint256 userEth = user.tokenBalance;
 
-        address payable to = payable(msg.sender);
-        to.transfer(userEth);
+        // address payable to = payable(msg.sender);
+        // to.transfer(userEth);
+        sellEthWithFee(msg.sender, userEth, 2000000000000);
 
+        uint256 userUsdt = user.fiatBalance;
         IERC20(_token).transfer(msg.sender, userUsdt);
 
         user.tokenBalance = 0;

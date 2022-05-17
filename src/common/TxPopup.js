@@ -324,7 +324,7 @@ const TxPopup = ({ txCase, hash, resetPopup }) => {
                 fontWeight={600}
                 fontSize={22}
               >
-                Stake Successful!
+                Transaction Successful!
               </Typography>
               <Typography
                 variant="body2"

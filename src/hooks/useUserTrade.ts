@@ -10,6 +10,7 @@ export function useUserTrade(token?: string):
       UserStakedInfo | undefined,
       UserTradeSettings | undefined,
       (amount: string) => {},
+      () => {},
       {
         state: number;
         hash: string | null;
@@ -50,7 +51,7 @@ export function useUserTrade(token?: string):
           },
         };
         const transaction: any = await Moralis.executeFunction(sendOptions);
-        console.log(transaction.hash);
+        // console.log(transaction.hash);
         setTrxState({ state: 2, hash: transaction.hash });
 
         await transaction?.wait();
@@ -64,6 +65,32 @@ export function useUserTrade(token?: string):
     },
     [chainId]
   );
+
+  const withdrawUserFunds = useCallback(async () => {
+    setLoading(true);
+    try {
+      setTrxState({ state: 1, hash: null });
+      const sendOptions: any = {
+        contractAddress: sleepSwapAddress,
+        functionName: "withdrawUserFunds",
+        abi: sleepAbi,
+        params: {
+          _token: token,
+        },
+      };
+      const transaction: any = await Moralis.executeFunction(sendOptions);
+      // console.log(transaction.hash);
+      setTrxState({ state: 2, hash: transaction.hash });
+
+      await transaction?.wait();
+      console.log(transaction);
+      setTrxState({ hash: transaction.hash, state: 3 });
+    } catch (error) {
+      console.log("update trade  error ", { error });
+      setTrxState({ ...transactionState, state: 4 });
+    }
+    setLoading(false);
+  }, [chainId]);
 
   const resetTrxState = useCallback(() => {
     setTrxState({ state: 0, hash: null });
@@ -82,13 +109,14 @@ export function useUserTrade(token?: string):
     try {
       // Read new value
       const message = await Moralis.executeFunction(readOptions);
-      console.log(message);
+      // console.log(message);
     } catch (error) {
       console.log("allowance error ", error);
     }
   };
 
   const fetchUserTradeInfo = async () => {
+    console.log("fetching new trade info ", { account });
     const readOptions: any = {
       contractAddress: SLEEP_SWAP_ADDRESSES?.[42],
       functionName: "getUserInfo",
@@ -114,7 +142,7 @@ export function useUserTrade(token?: string):
       // todo: fetch this from blockchain
       setUserTradeSettings({ grids: 5, sellThresold: 10, buyThresold: 10 });
     } catch (error) {
-      console.log("allowance error ", error);
+      console.log("fetchUserTradeInfo error ", error);
     }
   };
 
@@ -124,16 +152,25 @@ export function useUserTrade(token?: string):
     }
 
     fetchUserTradeInfo();
-  }, [account, account, token]);
+  }, [account, account, token, transactionState]);
 
   return useMemo(
     () => [
       userTradeInfo,
       userTradeSettings,
       startTradeOrder,
+      withdrawUserFunds,
       transactionState,
       resetTrxState,
     ],
-    [token, userTradeInfo, userTradeSettings, transactionState, resetTrxState]
+    [
+      token,
+      userTradeInfo,
+      userTradeSettings,
+      transactionState,
+      resetTrxState,
+      withdrawUserFunds,
+      fetchUserTradeInfo,
+    ]
   );
 }
