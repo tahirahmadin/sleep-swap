@@ -138,6 +138,77 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         return _percent;
     }
 
+    // Function to deposit fiat into pool
+    function startYieldSwap(
+        address _token,
+        uint256 _tokenAmount,
+        uint256 ethPriceInUSD
+    ) public {
+        require(_tokenAmount > 0, "Stake amount should be greater than 0.");
+
+        // uint256 ethPriceInUSD = getEthPriceUsd();
+        // buy eth with half of the _tokenAmount, with current eth price
+        uint256 usdtAmountForEth = _tokenAmount.div(2);
+        uint256 remainingUsdt = _tokenAmount - usdtAmountForEth;
+
+        // deduct fee
+        uint256 usdtAfterFee = usdtAmountForEth.mul(399).div(4).div(100);
+        uint256 orderFee = convertUsdtToEth(
+            usdtAmountForEth - usdtAfterFee,
+            ethPriceInUSD
+        );
+
+        totalFee += orderFee;
+        totalEthInPool += orderFee;
+
+        uint256 minEthReceived = convertUsdtToEth(usdtAfterFee, ethPriceInUSD);
+
+        require(
+            totalEthInPool > minEthReceived,
+            "Not enough pool balance to start trade"
+        );
+
+        IERC20(_token).transferFrom(msg.sender, address(this), _tokenAmount);
+
+        UserInfo storage user = users[msg.sender];
+
+        // update user and pool balances on deposit start
+        totalUsdtInPool += usdtAfterFee;
+
+        user.fiatBalance += remainingUsdt;
+        user.fiatAmountForEachOrder = user.fiatBalance.div(buySellSteps);
+
+        totalEthInPool -= minEthReceived;
+        user.tokenBalance += minEthReceived;
+        user.ethAmountForEachOrder = user.tokenBalance.div(buySellSteps);
+
+        user.depositTimeStamp = block.timestamp;
+        user.lastEthPrice = ethPriceInUSD;
+
+        user.totalStaked += _tokenAmount;
+
+        if (stakers[msg.sender] != true) {
+            user.userAddress = msg.sender;
+            stakers[msg.sender] = true;
+        }
+        // update user and pool balances on deposit end
+
+        // configure ordre and mappings start
+        orderPrices.push(ethPriceInUSD);
+        uint256 orderIndex = orderPrices.length - 1;
+
+        orderCurrentBuySellGridCounts[orderIndex] = [0, 0];
+
+        orderUsers[orderIndex] = msg.sender;
+
+        userOrders[msg.sender] = orderIndex;
+
+        orderStatus[orderIndex] = 0;
+        // configure order and mappings end
+
+        emit StartYieldSwap(msg.sender, _tokenAmount);
+    }
+
     function buyEthWithFee(
         address _account,
         uint256 _usdtAmount,
@@ -183,78 +254,6 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
 
         totalEthInPool += ethAfterFee;
         user.tokenBalance -= _ethAmount;
-    }
-
-    // Function to deposit fiat into pool
-    function startYieldSwap(
-        address _token,
-        uint256 _tokenAmount,
-        uint256 ethPriceInUSD
-    ) public {
-        require(_tokenAmount > 0, "Stake amount should be greater than 0.");
-
-        // uint256 ethPriceInUSD = getEthPriceUsd();
-        // buy eth with half of the _tokenAmount, with current eth price
-        uint256 usdtAmountForEth = _tokenAmount.div(2);
-        uint256 remainingUsdt = _tokenAmount - usdtAmountForEth;
-
-        // deduct fee
-        uint256 usdtAfterFee = usdtAmountForEth.mul(399).div(4).div(100);
-        uint256 orderFee = convertUsdtToEth(
-            usdtAmountForEth - usdtAfterFee,
-            ethPriceInUSD
-        );
-
-        totalFee += orderFee;
-        totalEthInPool += orderFee;
-
-        uint256 minEthReceived = convertUsdtToEth(usdtAfterFee, ethPriceInUSD);
-
-        require(
-            totalEthInPool > minEthReceived,
-            "Not enough pool balance to start trade"
-        );
-
-        IERC20(_token).transferFrom(msg.sender, address(this), _tokenAmount);
-
-        UserInfo storage user = users[msg.sender];
-
-        // buyEthWithFee(msg.sender, usdtAmountForEth, ethPriceInUSD);
-        // update user and pool balances on deposit start
-        totalUsdtInPool += usdtAfterFee;
-
-        user.fiatBalance += remainingUsdt;
-        user.fiatAmountForEachOrder = user.fiatBalance.div(buySellSteps);
-
-        totalEthInPool -= minEthReceived;
-        user.tokenBalance += minEthReceived;
-        user.ethAmountForEachOrder = user.tokenBalance.div(buySellSteps);
-
-        user.depositTimeStamp = block.timestamp;
-        user.lastEthPrice = ethPriceInUSD;
-
-        user.totalStaked += _tokenAmount;
-
-        if (stakers[msg.sender] != true) {
-            user.userAddress = msg.sender;
-            stakers[msg.sender] = true;
-        }
-        // update user and pool balances on deposit end
-
-        // configure ordre and mappings start
-        orderPrices.push(ethPriceInUSD);
-        uint256 orderIndex = orderPrices.length - 1;
-
-        orderCurrentBuySellGridCounts[orderIndex] = [0, 0];
-
-        orderUsers[orderIndex] = msg.sender;
-
-        userOrders[msg.sender] = orderIndex;
-
-        orderStatus[orderIndex] = 0;
-        // configure order and mappings end
-
-        emit StartYieldSwap(msg.sender, _tokenAmount);
     }
 
     function getPoolInfo()
@@ -317,6 +316,21 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         );
     }
 
+    function getUserOrderStatus(address _account)
+        public
+        view
+        returns (uint256 _buyRuns, uint256 _sellRuns)
+    {
+        uint256 userOrderIndex = userOrders[_account];
+        uint256[] storage userOrderStatus = orderCurrentBuySellGridCounts[
+            userOrderIndex
+        ];
+
+        _buyRuns = userOrderStatus[0];
+        _sellRuns = userOrderStatus[1];
+        return (_buyRuns, _sellRuns);
+    }
+
     //  stake eth reseves into pool
     function depositEth() public payable onlyOwner {
         require(msg.value > 0, "Stake amount should be greater than 0.");
@@ -371,9 +385,38 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         emit WithdrawUserFunds(msg.sender, userEth, userUsdt);
     }
 
+    function percentChange(int256 oldValue, int256 newValue)
+        internal
+        view
+        returns (int256)
+    {
+        return ((newValue - oldValue) * 100) / oldValue;
+    }
+
+    // step 1 generate order que
+    function updateOrderIndexes(uint256 currentEthPrice) public {
+        for (uint256 i = 0; i < orderPrices.length; i++) {
+            uint256 _orderPrice = orderPrices[i];
+
+            int256 priceChange = percentChange(
+                int256(_orderPrice),
+                int256(currentEthPrice)
+            );
+
+            if (priceChange >= 10) {
+                // sell order
+                orderQue.push(i);
+                orderTypes.push(0);
+            } else if (priceChange <= -10) {
+                orderQue.push(i);
+                orderTypes.push(1);
+            }
+        }
+    }
+
     // add this check before executing runOrder function
     //  if(_orderGridStatus[0] >=  buySellSteps  or _orderGridStatus[1] >=  buySellSteps)
-    // 2 stage
+    // step 2 iterate order que and run orders
     function runOrder(uint256 _orderIndex, uint256 _ethPriceUsd) public {
         require(
             _orderIndex >= lastOrderIndexExecuted,
@@ -422,36 +465,8 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
 
             orderCurrentBuySellGridCounts[_orderIndex][1] += 1;
         }
+
         lastOrderIndexExecuted = _orderIndex;
-    }
-
-    function percentChange(int256 oldValue, int256 newValue)
-        public
-        view
-        returns (int256)
-    {
-        return ((newValue - oldValue) * 100) / oldValue;
-    }
-
-    // 1
-    function updateOrderIndexes(uint256 currentEthPrice) public {
-        for (uint256 i = 0; i < orderPrices.length; i++) {
-            uint256 _orderPrice = orderPrices[i];
-
-            int256 priceChange = percentChange(
-                int256(_orderPrice),
-                int256(currentEthPrice)
-            );
-
-            if (priceChange >= 10) {
-                // sell order
-                orderQue.push(i);
-                orderTypes.push(0);
-            } else if (priceChange <= -10) {
-                orderQue.push(i);
-                orderTypes.push(1);
-            }
-        }
     }
 
     //1. write automatic buy function on price down with 0.25% fee duduction.

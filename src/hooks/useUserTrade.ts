@@ -117,9 +117,17 @@ export function useUserTrade(token?: string):
 
   const fetchUserTradeInfo = async () => {
     console.log("fetching new trade info ", { account });
-    const readOptions: any = {
+    const readOptions0: any = {
       contractAddress: SLEEP_SWAP_ADDRESSES?.[42],
       functionName: "getUserInfo",
+      abi: sleepAbi,
+      params: {
+        _account: account,
+      },
+    };
+    const readOptions1: any = {
+      contractAddress: SLEEP_SWAP_ADDRESSES?.[42],
+      functionName: "getUserOrderStatus",
       abi: sleepAbi,
       params: {
         _account: account,
@@ -128,7 +136,10 @@ export function useUserTrade(token?: string):
 
     try {
       // Read new value
-      const info: any = await Moralis.executeFunction(readOptions);
+      const [info, orders]: [any, any] = await Promise.all([
+        Moralis.executeFunction(readOptions0),
+        Moralis.executeFunction(readOptions1),
+      ]);
       console.log("user Trade info", info);
       setTradeInfo({
         staked: info?._totalStaked?.toString(),
@@ -137,6 +148,8 @@ export function useUserTrade(token?: string):
         sellOrderAmount: info?._ethOrderAmount?.toString(),
         buyOrderAmount: info?._usdtOrderAmount?.toString(),
         earnings: "0",
+        completedBuyOrders: orders?._buyRuns?.toString(),
+        completedSellOrders: orders?._sellRuns?.toString(),
       });
 
       // todo: fetch this from blockchain

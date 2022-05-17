@@ -28,6 +28,8 @@ export interface UserStakedInfo {
   tokenBalance: string;
   buyOrderAmount: string;
   sellOrderAmount: string;
+  completedBuyOrders: string;
+  completedSellOrders: string;
 }
 
 export interface TransactionStatus {

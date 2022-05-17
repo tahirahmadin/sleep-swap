@@ -556,7 +556,7 @@ const StakePopup = ({
                     </Box>
                   </Grid>
 
-                  <Box display={"flex"} justifyContent="space-around" mt={2}>
+                  {/* <Box display={"flex"} justifyContent="space-around" mt={2}>
                     <Box>
                       <Typography
                         variant="body2"
@@ -601,7 +601,7 @@ const StakePopup = ({
                         2637, 2970,3246
                       </Typography>
                     </Box>
-                  </Box>
+                  </Box> */}
 
                   <div className="text-center">
                     <button
@@ -854,7 +854,7 @@ const StakePopup = ({
                         fontSize={14}
                         color={"#454545"}
                       >
-                        <strong>Your Buy Orders</strong>
+                        <strong>Completed Buy Orders</strong>
                       </Typography>
                       <Typography
                         variant="body2"
@@ -864,7 +864,7 @@ const StakePopup = ({
                         fontSize={12}
                         color={"#757575"}
                       >
-                        2326, 2053,1856
+                        {userStaked?.completedBuyOrders || 0}
                       </Typography>
                     </Box>
                     <Box>
@@ -876,7 +876,7 @@ const StakePopup = ({
                         fontSize={14}
                         color={"#454545"}
                       >
-                        <strong>Your Sell Orders</strong>
+                        <strong>Completed Sell Orders</strong>
                       </Typography>
                       <Typography
                         variant="body2"
@@ -886,7 +886,7 @@ const StakePopup = ({
                         fontSize={12}
                         color={"#757575"}
                       >
-                        2637, 2970,3246
+                        {userStaked?.completedSellOrders || 0}
                       </Typography>
                     </Box>
                   </Box>
