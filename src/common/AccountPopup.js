@@ -4,7 +4,7 @@ import { Button, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { Close } from "@mui/icons-material";
 import { useMoralis, useMoralisWeb3Api } from "react-moralis";
-import Web3 from "web3";
+import { fromWei } from "../utils/helper";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -214,8 +214,8 @@ const AccountPopup = ({ setBalancePopup }) => {
       network: "kovan",
       chain: "kovan",
     });
-    console.log(result);
-    let bal = Web3.utils.fromWei(result.balance.toString(), "ether");
+
+    let bal = fromWei(result.balance.toString(), 18);
     setBalance(parseFloat(bal).toFixed(3));
     return bal;
   };

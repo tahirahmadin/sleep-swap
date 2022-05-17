@@ -112,7 +112,14 @@ export default function PoolCard() {
     poolToken.address
   );
 
-  const [userStaked, userTradeSettings] = useUserTrade(poolToken.address);
+  const [
+    userStaked,
+    userTradeSettings,
+    startTradeOrder,
+    withdrawUserFunds,
+    transactionState,
+    resetTrxState,
+  ] = useUserTrade(poolToken.address);
   const [poolInfo, poolLoading] = usePoolInfo();
 
   const totalPoolValueLocked = useMemo(() => {
@@ -130,10 +137,6 @@ export default function PoolCard() {
       .toFixed(3)
       .toString();
   }, [poolInfo]);
-
-  useEffect(() => {
-    console.log("user staked ", userStaked);
-  }, [userStaked]);
 
   return (
     <Box>
@@ -282,7 +285,7 @@ export default function PoolCard() {
             </Box>
           </Box>
           <Box px={2} mt={2} className="text-center">
-            {!allowance ? (
+            {allowance ? (
               <Button
                 onClick={() => setStakePopup(true)}
                 style={{
@@ -316,6 +319,12 @@ export default function PoolCard() {
         stakePopup={stakePopup}
         poolToken={poolToken}
         ethToken={ethToken}
+        userStaked={userStaked}
+        userTradeSettings={userTradeSettings}
+        startTradeOrder={startTradeOrder}
+        withdrawUserFunds={withdrawUserFunds}
+        transactionState={transactionState}
+        resetTrxState={resetTrxState}
       />
     </Box>
   );

@@ -564,6 +564,30 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_account",
+        "type": "address"
+      }
+    ],
+    "name": "getUserOrderStatus",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "_buyRuns",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_sellRuns",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "depositEth",
     "outputs": [],
@@ -594,6 +618,19 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "currentEthPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateOrderIndexes",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "_orderIndex",
         "type": "uint256"
       },
@@ -604,43 +641,6 @@
       }
     ],
     "name": "runOrder",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "int256",
-        "name": "oldValue",
-        "type": "int256"
-      },
-      {
-        "internalType": "int256",
-        "name": "newValue",
-        "type": "int256"
-      }
-    ],
-    "name": "percentChange",
-    "outputs": [
-      {
-        "internalType": "int256",
-        "name": "",
-        "type": "int256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "currentEthPrice",
-        "type": "uint256"
-      }
-    ],
-    "name": "updateOrderIndexes",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

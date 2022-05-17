@@ -17,8 +17,9 @@ import { useMoralis, useMoralisWeb3Api } from "react-moralis";
 import Web3 from "web3";
 import TxPopup from "../../../common/TxPopup";
 import { useUserTrade } from "../../../hooks/useUserTrade";
-import { toWei } from "../../../utils/helper";
+import { formatCurrency, fromWei, toWei } from "../../../utils/helper";
 import BigNumber from "bignumber.js";
+import { useTokenBalance } from "../../../hooks/useBalance";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -221,6 +222,12 @@ const StakePopup = ({
   setStakePopup,
   poolToken,
   ethToken,
+  userStaked,
+  userTradeSettings,
+  startTradeOrder,
+  withdrawUserFunds,
+  transactionState,
+  resetTrxState,
 }) => {
   const classes = useStyles();
 
@@ -229,9 +236,11 @@ const StakePopup = ({
   const Web3Api = useMoralisWeb3Api();
   const userAddress = user ? user.attributes.ethAddress : "...";
 
-  const [userStaked, userTradeSettings, startTradeOrder] = useUserTrade(
-    poolToken.address
-  );
+  const tokenBalance = useTokenBalance(poolToken?.address);
+
+  useEffect(() => {
+    console.log("token balance ", tokenBalance);
+  }, [tokenBalance]);
 
   const [amount, setAmount] = useState("");
   const [percent, setPercent] = useState("");
@@ -239,6 +248,7 @@ const StakePopup = ({
 
   const resetPopup = () => {
     setStakePopup(false);
+    resetTrxState();
   };
 
   const handleStake = useCallback(() => {
@@ -250,6 +260,14 @@ const StakePopup = ({
     console.log("calling trade callback", toWei(amount, poolToken.decimals));
     startTradeOrder(toWei(amount, poolToken.decimals));
   }, [amount, startTradeOrder]);
+
+  const handleWithdraw = useCallback(() => {
+    if (new BigNumber(userStaked?.staked).eq(0)) {
+      return;
+    }
+
+    withdrawUserFunds();
+  }, [userStaked]);
 
   const marks = [
     {
@@ -295,7 +313,6 @@ const StakePopup = ({
     setGrids(value);
   };
 
-  const stakeFunds = () => {};
   return (
     <Dialog
       open={stakePopup}
@@ -311,97 +328,24 @@ const StakePopup = ({
       fullWidth={false}
     >
       <div className={classes.background}>
-        <div className={classes.container}>
-          {txCase === 0 && (
-            <div className="h-100 w-100">
-              <div className="d-flex justify-content-end" onClick={resetPopup}>
-                <Close style={{ cursor: "pointer" }} />
-              </div>
-              <div className="d-flex flex-column justify-content-around">
-                <div>
-                  <Typography
-                    variant="h4"
-                    className={classes.heading}
-                    fontWeight={700}
-                  >
-                    Stake
-                  </Typography>
-                  <Box
-                    display="flex"
-                    flexDirection={"row"}
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection={"row"}
-                      justifyContent="flex-start"
-                      alignItems="center"
-                    >
-                      <img
-                        src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
-                        alt="Polygon"
-                        height="20px"
-                      />{" "}
-                      <img
-                        src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
-                        alt="USDT"
-                        height="20px"
-                      />
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      className={classes.para}
-                      textAlign="left"
-                      fontWeight={600}
-                      ml={1}
-                    >
-                      MATIC/USDT
-                    </Typography>
-                  </Box>
-                </div>
-
-                <Box
-                  display={"flex"}
-                  justifyContent={"space-between"}
-                  mt={2}
-                  style={{
-                    border: "1px solid rgba(106, 85, 234,0.2)",
-                    padding: "6px 20px 6px 20px",
-
-                    borderRadius: 10,
-                    backgroundColor: "rgba(106, 85, 234,0.03)",
-                  }}
+        {new BigNumber(userStaked?.staked).eq(0) || !userStaked?.staked ? (
+          <div className={classes.container}>
+            {transactionState?.state === 0 && (
+              <div className="h-100 w-100">
+                <div
+                  className="d-flex justify-content-end"
+                  onClick={resetPopup}
                 >
-                  <Box>
+                  <Close style={{ cursor: "pointer" }} />
+                </div>
+                <div className="d-flex flex-column justify-content-around">
+                  <div>
                     <Typography
-                      variant="body2"
-                      textAlign={"left"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={12}
-                      color={"#757575"}
+                      variant="h4"
+                      className={classes.heading}
+                      fontWeight={700}
                     >
-                      Amount:
-                    </Typography>
-                    <Input
-                      value={amount}
-                      onInput={(event) => setAmount(event.target.value)}
-                      fullWidth
-                      placeholder="0"
-                      style={{ fontSize: 24, fontWeight: 600 }}
-                    />
-                  </Box>
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      textAlign={"left"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={12}
-                      color={"#757575"}
-                    >
-                      Available: 3,235
+                      Stake
                     </Typography>
                     <Box
                       display="flex"
@@ -416,183 +360,558 @@ const StakePopup = ({
                         alignItems="center"
                       >
                         <img
-                          src="https://cdn3d.iconscout.com/3d/premium/thumb/usdt-coin-4999518-4160019.png"
-                          alt="USDT"
-                          height="30px"
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
+                          alt="Polygon"
+                          height="20px"
                         />{" "}
+                        <img
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                          alt="USDT"
+                          height="20px"
+                        />
                       </Box>
                       <Typography
                         variant="body2"
                         className={classes.para}
-                        fontSize={20}
                         textAlign="left"
                         fontWeight={600}
                         ml={1}
                       >
-                        USDT
+                        MATIC/USDT
                       </Typography>
                     </Box>
-                  </Box>
-                </Box>
-                <Box
-                  mt={2}
-                  style={{
-                    border: "1px solid rgba(106, 85, 234,0.2)",
-                    padding: "6px 30px 6px 30px",
-                    borderRadius: 10,
-                    backgroundColor: "rgba(106, 85, 234,0.03)",
-                  }}
-                >
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      textAlign={"left"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={12}
-                      color={"#757575"}
-                    >
-                      Grids:
-                    </Typography>
-                    <Slider
-                      defaultValue={userTradeSettings?.grids}
-                      getAriaValueText={valuetext}
-                      step={null}
-                      marks={marks}
-                      fullWidth
-                    />
-                  </Box>
-                </Box>
-                <Box></Box>
-                <Grid
-                  container
-                  display={"flex"}
-                  justifyContent={"space-between"}
-                  mt={2}
-                  style={{
-                    border: "1px solid rgba(106, 85, 234,0.2)",
-                    padding: "6px 30px 6px 30px",
-                    borderRadius: 10,
-                    backgroundColor: "rgba(106, 85, 234,0.03)",
-                  }}
-                >
-                  <Box
-                    style={{
-                      borderRight: "1px solid #e5e5e5",
-                      paddingRight: 10,
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      textAlign={"left"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={12}
-                      color={"#757575"}
-                    >
-                      Grids:
-                    </Typography>
-                    <Input
-                      value={userTradeSettings?.grids}
-                      fullWidth
-                      onChange={(e) => handleGrids(e)}
-                    />
-                  </Box>
+                  </div>
 
                   <Box
-                    ml={1}
+                    display={"flex"}
+                    justifyContent={"space-between"}
                     mt={2}
                     style={{
-                      width: "50%",
+                      border: "1px solid rgba(106, 85, 234,0.2)",
+                      padding: "6px 20px 6px 20px",
+
+                      borderRadius: 10,
+                      backgroundColor: "rgba(106, 85, 234,0.03)",
+                    }}
+                  >
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Amount:
+                      </Typography>
+                      <Input
+                        value={amount}
+                        onInput={(event) => setAmount(event.target.value)}
+                        fullWidth
+                        placeholder="0"
+                        style={{ fontSize: 24, fontWeight: 600 }}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Available:{" "}
+                        {formatCurrency(
+                          fromWei(tokenBalance, poolToken.decimals)
+                        )}
+                      </Typography>
+                      <Box
+                        display="flex"
+                        flexDirection={"row"}
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        <Box
+                          display="flex"
+                          flexDirection={"row"}
+                          justifyContent="flex-start"
+                          alignItems="center"
+                        >
+                          <img
+                            src="https://cdn3d.iconscout.com/3d/premium/thumb/usdt-coin-4999518-4160019.png"
+                            alt="USDT"
+                            height="30px"
+                          />{" "}
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          className={classes.para}
+                          fontSize={20}
+                          textAlign="left"
+                          fontWeight={600}
+                          ml={1}
+                        >
+                          USDT
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box
+                    mt={2}
+                    style={{
                       border: "1px solid rgba(106, 85, 234,0.2)",
                       padding: "6px 30px 6px 30px",
                       borderRadius: 10,
                       backgroundColor: "rgba(106, 85, 234,0.03)",
                     }}
                   >
-                    <Typography
-                      variant="body2"
-                      textAlign={"left"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={12}
-                      color={"#757575"}
-                    >
-                      Trigger Percent:
-                    </Typography>
-                    <Input
-                      type="number"
-                      disableUnderline
-                      value={userTradeSettings?.buyThresold}
-                      fullWidth
-                      placeholder="10"
-                      onChange={(e) => handlePercentage(e)}
-                      style={{ fontSize: 22, fontWeight: 600 }}
-                    />
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Grids:
+                      </Typography>
+                      <Slider
+                        defaultValue={userTradeSettings?.grids}
+                        getAriaValueText={valuetext}
+                        step={null}
+                        marks={marks}
+                        fullWidth
+                      />
+                    </Box>
                   </Box>
-                </Grid>
-
-                <Box display={"flex"} justifyContent="space-around" mt={2}>
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      textAlign={"center"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={14}
-                      color={"#454545"}
-                    >
-                      <strong>Your Buy Orders</strong>
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      textAlign={"center"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={12}
-                      color={"#757575"}
-                    >
-                      2326, 2053,1856
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      textAlign={"center"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={14}
-                      color={"#454545"}
-                    >
-                      <strong>Your Sell Orders</strong>
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      textAlign={"center"}
-                      className={classes.para}
-                      fontWeight={500}
-                      fontSize={12}
-                      color={"#757575"}
-                    >
-                      2637, 2970,3246
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <div className="text-center">
-                  <button
-                    className={classes.connectButton}
-                    onClick={handleStake}
+                  <Box></Box>
+                  <Grid
+                    container
+                    display={"flex"}
+                    justifyContent={"space-between"}
+                    mt={2}
+                    style={{
+                      border: "1px solid rgba(106, 85, 234,0.2)",
+                      padding: "6px 30px 6px 30px",
+                      borderRadius: 10,
+                      backgroundColor: "rgba(106, 85, 234,0.03)",
+                    }}
                   >
-                    STAKE NOW
-                  </button>
+                    <Box
+                      style={{
+                        borderRight: "1px solid #e5e5e5",
+                        paddingRight: 10,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Grids:
+                      </Typography>
+                      <Input
+                        value={userTradeSettings?.grids}
+                        fullWidth
+                        onChange={(e) => handleGrids(e)}
+                      />
+                    </Box>
+
+                    <Box
+                      ml={1}
+                      mt={2}
+                      style={{
+                        width: "50%",
+                        border: "1px solid rgba(106, 85, 234,0.2)",
+                        padding: "6px 30px 6px 30px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Trigger Percent:
+                      </Typography>
+                      <Input
+                        type="number"
+                        disableUnderline
+                        value={userTradeSettings?.buyThresold}
+                        fullWidth
+                        placeholder="10"
+                        onChange={(e) => handlePercentage(e)}
+                        style={{ fontSize: 22, fontWeight: 600 }}
+                      />
+                    </Box>
+                  </Grid>
+
+                  {/* <Box display={"flex"} justifyContent="space-around" mt={2}>
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        textAlign={"center"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={14}
+                        color={"#454545"}
+                      >
+                        <strong>Your Buy Orders</strong>
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        textAlign={"center"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        2326, 2053,1856
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        textAlign={"center"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={14}
+                        color={"#454545"}
+                      >
+                        <strong>Your Sell Orders</strong>
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        textAlign={"center"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        2637, 2970,3246
+                      </Typography>
+                    </Box>
+                  </Box> */}
+
+                  <div className="text-center">
+                    <button
+                      className={classes.connectButton}
+                      onClick={handleStake}
+                    >
+                      STAKE NOW
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {txCase > 0 && <TxPopup txCase={txCase} resetPopup={resetPopup} />}
-        </div>
+            {transactionState?.state > 0 && (
+              <TxPopup
+                txCase={transactionState?.state}
+                hash={transactionState?.hash}
+                resetPopup={resetPopup}
+              />
+            )}
+          </div>
+        ) : (
+          <div className={classes.container}>
+            {transactionState?.state === 0 && (
+              <div className="h-100 w-100">
+                <div
+                  className="d-flex justify-content-end"
+                  onClick={resetPopup}
+                >
+                  <Close style={{ cursor: "pointer" }} />
+                </div>
+                <div className="d-flex flex-column justify-content-around">
+                  <div>
+                    <Typography
+                      variant="h4"
+                      className={classes.heading}
+                      fontWeight={700}
+                    >
+                      Unstake
+                    </Typography>
+                    <Box
+                      display="flex"
+                      flexDirection={"row"}
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <Box
+                        display="flex"
+                        flexDirection={"row"}
+                        justifyContent="flex-start"
+                        alignItems="center"
+                      >
+                        <img
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
+                          alt="Polygon"
+                          height="20px"
+                        />{" "}
+                        <img
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                          alt="USDT"
+                          height="20px"
+                        />
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="left"
+                        fontWeight={600}
+                        ml={1}
+                      >
+                        MATIC/USDT
+                      </Typography>
+                    </Box>
+                  </div>
+
+                  <Box
+                    display={"flex"}
+                    justifyContent={"space-between"}
+                    mt={2}
+                    style={{
+                      border: "1px solid rgba(106, 85, 234,0.2)",
+                      padding: "6px 20px 6px 20px",
+
+                      borderRadius: 10,
+                      backgroundColor: "rgba(106, 85, 234,0.03)",
+                    }}
+                  >
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Amount:
+                      </Typography>
+                      <Input
+                        value={fromWei(
+                          userStaked?.usdtBalance,
+                          poolToken?.decimals
+                        )}
+                        fullWidth
+                        placeholder="0"
+                        style={{ fontSize: 24, fontWeight: 600 }}
+                      />
+                    </Box>
+                    <Box>
+                      {/* <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Available:{" "}
+                        {formatCurrency(
+                          fromWei(tokenBalance, poolToken.decimals)
+                        )}
+                      </Typography> */}
+                      <Box
+                        display="flex"
+                        flexDirection={"row"}
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        <Box
+                          display="flex"
+                          flexDirection={"row"}
+                          justifyContent="flex-start"
+                          alignItems="center"
+                        >
+                          <img
+                            src="https://cdn3d.iconscout.com/3d/premium/thumb/usdt-coin-4999518-4160019.png"
+                            alt="USDT"
+                            height="30px"
+                          />{" "}
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          className={classes.para}
+                          fontSize={20}
+                          textAlign="left"
+                          fontWeight={600}
+                          ml={1}
+                        >
+                          USDT
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  <Box
+                    display={"flex"}
+                    justifyContent={"space-between"}
+                    mt={2}
+                    style={{
+                      border: "1px solid rgba(106, 85, 234,0.2)",
+                      padding: "6px 20px 6px 20px",
+
+                      borderRadius: 10,
+                      backgroundColor: "rgba(106, 85, 234,0.03)",
+                    }}
+                  >
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Amount:
+                      </Typography>
+                      <Input
+                        value={fromWei(userStaked?.tokenBalance, 18)}
+                        // onInput={(event) => setAmount(event.target.value)}
+                        disableUnderline
+                        fullWidth
+                        placeholder="0"
+                        style={{ fontSize: 24, fontWeight: 600 }}
+                      />
+                    </Box>
+                    <Box>
+                      {/* <Typography
+                        variant="body2"
+                        textAlign={"left"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        Available:{" "}
+                        {formatCurrency(
+                          fromWei(tokenBalance, poolToken.decimals)
+                        )}
+                      </Typography> */}
+                      <Box
+                        display="flex"
+                        flexDirection={"row"}
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        <Box
+                          display="flex"
+                          flexDirection={"row"}
+                          justifyContent="flex-start"
+                          alignItems="center"
+                        >
+                          <img
+                            src="https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880"
+                            alt="ETH"
+                            height="30px"
+                          />{" "}
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          className={classes.para}
+                          fontSize={20}
+                          textAlign="left"
+                          fontWeight={600}
+                          ml={1}
+                        >
+                          ETH
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box
+                    mt={2}
+                    style={{
+                      border: "1px solid rgba(106, 85, 234,0.2)",
+                      padding: "6px 30px 6px 30px",
+                      borderRadius: 10,
+                      backgroundColor: "rgba(106, 85, 234,0.03)",
+                    }}
+                  ></Box>
+                  <Box></Box>
+
+                  <Box display={"flex"} justifyContent="space-around" mt={2}>
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        textAlign={"center"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={14}
+                        color={"#454545"}
+                      >
+                        <strong>Completed Buy Orders</strong>
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        textAlign={"center"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        {userStaked?.completedBuyOrders || 0}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        textAlign={"center"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={14}
+                        color={"#454545"}
+                      >
+                        <strong>Completed Sell Orders</strong>
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        textAlign={"center"}
+                        className={classes.para}
+                        fontWeight={500}
+                        fontSize={12}
+                        color={"#757575"}
+                      >
+                        {userStaked?.completedSellOrders || 0}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <div className="text-center">
+                    <button
+                      className={classes.connectButton}
+                      onClick={handleWithdraw}
+                    >
+                      Withdraw funds
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {transactionState?.state > 0 && (
+              <TxPopup
+                txCase={transactionState?.state}
+                hash={transactionState?.hash}
+                resetPopup={resetPopup}
+              />
+            )}
+          </div>
+        )}
       </div>{" "}
     </Dialog>
   );
