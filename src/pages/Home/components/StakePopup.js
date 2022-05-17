@@ -476,30 +476,29 @@ const StakePopup = ({
                     backgroundColor: "rgba(106, 85, 234,0.03)",
                   }}
                 >
-                  <Grid item md={6} style={{ paddingRight: 10 }}>
-                    <Box
-                      style={{
-                        borderRight: "1px solid #e5e5e5",
-                        paddingRight: 10,
-                      }}
+                  <Box
+                    style={{
+                      borderRight: "1px solid #e5e5e5",
+                      paddingRight: 10,
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      textAlign={"left"}
+                      className={classes.para}
+                      fontWeight={500}
+                      fontSize={12}
+                      color={"#757575"}
                     >
-                      <Typography
-                        variant="body2"
-                        textAlign={"left"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
-                      >
-                        Grids:
-                      </Typography>
-                      <Input
-                        value={userTradeSettings?.grids}
-                        fullWidth
-                        onChange={(e) => handleGrids(e)}
-                      />
-                    </Box>
+                      Grids:
+                    </Typography>
+                    <Input
+                      value={userTradeSettings?.grids}
+                      fullWidth
+                      onChange={(e) => handleGrids(e)}
+                    />
                   </Box>
+
                   <Box
                     ml={1}
                     mt={2}
@@ -527,12 +526,11 @@ const StakePopup = ({
                       value={userTradeSettings?.buyThresold}
                       fullWidth
                       placeholder="10"
-                      value={percent}
                       onChange={(e) => handlePercentage(e)}
                       style={{ fontSize: 22, fontWeight: 600 }}
                     />
                   </Box>
-                </div>
+                </Grid>
 
                 <Box display={"flex"} justifyContent="space-around" mt={2}>
                   <Box>
