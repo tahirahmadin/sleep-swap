@@ -3,18 +3,21 @@ import { SLEEP_SWAP_ADDRESSES } from "../constants";
 import { useChain, useMoralis, useMoralisWeb3Api } from "react-moralis";
 
 import sleepAbi from "../contracts/abi/sleepSwap.json";
-import { UserStakedInfo, UserTradeSettings } from "../utils/interface";
+import {
+  TransactionStatus,
+  UserStakedInfo,
+  UserTradeSettings,
+} from "../utils/interface";
 
-export function useUserTrade(token?: string):
+export function useUserTrade(
+  token?: string
+):
   | [
       UserStakedInfo | undefined,
       UserTradeSettings | undefined,
       (amount: string) => {},
       () => {},
-      {
-        state: number;
-        hash: string | null;
-      },
+      TransactionStatus,
       () => void
     ]
   | null {
@@ -28,18 +31,16 @@ export function useUserTrade(token?: string):
   ); // fetch user trade info on each block update
   const { Moralis } = useMoralis();
   const Web3Api = useMoralisWeb3Api();
-  const [tradeLoading, setLoading] = useState(false);
-  const [transactionState, setTrxState] = useState<{
-    state: number;
-    hash: string | null;
-  }>({ state: 0, hash: null });
+  const [transactionState, setTrxState] = useState<TransactionStatus>({
+    status: 0,
+    hash: null,
+  });
 
   const sleepSwapAddress = SLEEP_SWAP_ADDRESSES?.[42];
   const startTradeOrder = useCallback(
     async (amount: string) => {
-      setLoading(true);
       try {
-        setTrxState({ state: 1, hash: null });
+        setTrxState({ status: 1, hash: null });
         const sendOptions: any = {
           contractAddress: sleepSwapAddress,
           functionName: "startYieldSwap",
@@ -52,24 +53,22 @@ export function useUserTrade(token?: string):
         };
         const transaction: any = await Moralis.executeFunction(sendOptions);
         // console.log(transaction.hash);
-        setTrxState({ state: 2, hash: transaction.hash });
+        setTrxState({ status: 2, hash: transaction.hash });
 
         await transaction?.wait();
         console.log(transaction);
-        setTrxState({ hash: transaction.hash, state: 3 });
+        setTrxState({ hash: transaction.hash, status: 3 });
       } catch (error) {
         console.log("update trade  error ", { error });
-        setTrxState({ ...transactionState, state: 4 });
+        setTrxState({ ...transactionState, status: 4 });
       }
-      setLoading(false);
     },
     [chainId]
   );
 
   const withdrawUserFunds = useCallback(async () => {
-    setLoading(true);
     try {
-      setTrxState({ state: 1, hash: null });
+      setTrxState({ status: 1, hash: null });
       const sendOptions: any = {
         contractAddress: sleepSwapAddress,
         functionName: "withdrawUserFunds",
@@ -80,20 +79,19 @@ export function useUserTrade(token?: string):
       };
       const transaction: any = await Moralis.executeFunction(sendOptions);
       // console.log(transaction.hash);
-      setTrxState({ state: 2, hash: transaction.hash });
+      setTrxState({ status: 2, hash: transaction.hash });
 
       await transaction?.wait();
       console.log(transaction);
-      setTrxState({ hash: transaction.hash, state: 3 });
+      setTrxState({ hash: transaction.hash, status: 3 });
     } catch (error) {
       console.log("update trade  error ", { error });
-      setTrxState({ ...transactionState, state: 4 });
+      setTrxState({ ...transactionState, status: 4 });
     }
-    setLoading(false);
   }, [chainId]);
 
   const resetTrxState = useCallback(() => {
-    setTrxState({ state: 0, hash: null });
+    setTrxState({ status: 0, hash: null });
   }, []);
 
   const fetchUserTradeSettings = async () => {

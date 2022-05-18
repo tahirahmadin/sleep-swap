@@ -33,7 +33,7 @@ export interface UserStakedInfo {
 }
 
 export interface TransactionStatus {
-  status: string;
+  status: number;
   hash: string | null;
 }
 

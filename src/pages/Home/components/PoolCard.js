@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import StakePopup from "./StakePopup";
@@ -108,7 +108,7 @@ export default function PoolCard() {
   const poolToken = TOKENS?.["USDT"];
   const ethToken = TOKENS?.["ETH"];
 
-  const [allowance, confirmAllowance, approvalLoading] = useTokenAllowance(
+  const [allowance, confirmAllowance, approveTrxStatus] = useTokenAllowance(
     poolToken.address
   );
 
@@ -137,6 +137,10 @@ export default function PoolCard() {
       .toFixed(3)
       .toString();
   }, [poolInfo]);
+
+  const handleAllowance = useCallback(() => {
+    confirmAllowance();
+  }, [confirmAllowance]);
 
   return (
     <Box>
@@ -299,7 +303,7 @@ export default function PoolCard() {
               </Button>
             ) : (
               <Button
-                onClick={() => confirmAllowance()}
+                onClick={handleAllowance}
                 style={{
                   borderRadius: 10,
                   background: "#6A55EA",
@@ -307,7 +311,9 @@ export default function PoolCard() {
                   color: "white",
                 }}
               >
-                {approvalLoading ? "waiting..." : "Approve USDT"}
+                {approveTrxStatus?.status > 0 && approveTrxStatus?.status !== 4
+                  ? "Approving..."
+                  : "Approve USDT"}
               </Button>
             )}
           </Box>
