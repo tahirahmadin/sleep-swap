@@ -275,20 +275,20 @@ const StakePopup = ({
       label: "2",
     },
     {
-      value: 20,
-      label: "6",
+      value: 25,
+      label: "4",
     },
     {
       value: 50,
-      label: "10",
+      label: "6",
     },
     {
       value: 75,
-      label: "14",
+      label: "8",
     },
     {
       value: 100,
-      label: "20",
+      label: "10",
     },
   ];
 
@@ -304,6 +304,7 @@ const StakePopup = ({
 
     setPercent(value);
   };
+
   const handleGrids = (event) => {
     let { value } = event.target;
     let min = 1;
@@ -313,6 +314,28 @@ const StakePopup = ({
     setGrids(value);
   };
 
+  const handleSliderChange = (event, newValue) => {
+    if (newValue === 100) {
+      setGrids(10);
+      console.log(newValue);
+    }
+    if (newValue === 75) {
+      setGrids(8);
+      console.log(newValue);
+    }
+    if (newValue === 50) {
+      setGrids(6);
+      console.log(newValue);
+    }
+    if (newValue === 25) {
+      setGrids(4);
+      console.log(newValue);
+    }
+    if (newValue === 0) {
+      setGrids(2);
+      console.log(newValue);
+    }
+  };
   return (
     <Dialog
       open={stakePopup}
@@ -347,6 +370,7 @@ const StakePopup = ({
                     >
                       Stake
                     </Typography>
+                    {console.log(grids)}
                     <Box
                       display="flex"
                       flexDirection={"row"}
@@ -410,6 +434,7 @@ const StakePopup = ({
                         onInput={(event) => setAmount(event.target.value)}
                         fullWidth
                         placeholder="0"
+                        disableUnderline
                         style={{ fontSize: 24, fontWeight: 600 }}
                       />
                     </Box>
@@ -458,35 +483,7 @@ const StakePopup = ({
                       </Box>
                     </Box>
                   </Box>
-                  <Box
-                    mt={2}
-                    style={{
-                      border: "1px solid rgba(106, 85, 234,0.2)",
-                      padding: "6px 30px 6px 30px",
-                      borderRadius: 10,
-                      backgroundColor: "rgba(106, 85, 234,0.03)",
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        textAlign={"left"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
-                      >
-                        Grids:
-                      </Typography>
-                      <Slider
-                        defaultValue={userTradeSettings?.grids}
-                        getAriaValueText={valuetext}
-                        step={null}
-                        marks={marks}
-                        fullWidth
-                      />
-                    </Box>
-                  </Box>
+
                   <Box></Box>
                   <Grid
                     container
@@ -495,65 +492,66 @@ const StakePopup = ({
                     mt={2}
                     style={{
                       border: "1px solid rgba(106, 85, 234,0.2)",
-                      padding: "6px 30px 6px 30px",
+                      padding: "6px 20px 6px 20px",
                       borderRadius: 10,
                       backgroundColor: "rgba(106, 85, 234,0.03)",
                     }}
                   >
-                    <Box
-                      style={{
-                        borderRight: "1px solid #e5e5e5",
-                        paddingRight: 10,
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        textAlign={"left"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
+                    <Grid item md={6}>
+                      <Box
+                        style={{
+                          borderRight: "1px solid #e5e5e5",
+                          paddingRight: 15,
+                        }}
                       >
-                        Grids:
-                      </Typography>
-                      <Input
-                        value={userTradeSettings?.grids}
-                        fullWidth
-                        onChange={(e) => handleGrids(e)}
-                      />
-                    </Box>
+                        <Typography
+                          variant="body2"
+                          textAlign={"left"}
+                          className={classes.para}
+                          fontWeight={500}
+                          fontSize={12}
+                          color={"#757575"}
+                        >
+                          Grids:
+                        </Typography>
+                        <Slider
+                          defaultValue={userTradeSettings?.grids}
+                          getAriaValueText={valuetext}
+                          step={null}
+                          marks={marks}
+                          fullWidth
+                          onChange={handleSliderChange}
+                        />
+                      </Box>
+                    </Grid>
 
-                    <Box
-                      ml={1}
-                      mt={2}
-                      style={{
-                        width: "50%",
-                        border: "1px solid rgba(106, 85, 234,0.2)",
-                        padding: "6px 30px 6px 30px",
-                        borderRadius: 10,
-                        backgroundColor: "rgba(106, 85, 234,0.03)",
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        textAlign={"left"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
+                    <Grid md={6}>
+                      <Box
+                        style={{
+                          paddingLeft: 15,
+                        }}
                       >
-                        Trigger Percent:
-                      </Typography>
-                      <Input
-                        type="number"
-                        disableUnderline
-                        value={userTradeSettings?.buyThresold}
-                        fullWidth
-                        placeholder="10"
-                        onChange={(e) => handlePercentage(e)}
-                        style={{ fontSize: 22, fontWeight: 600 }}
-                      />
-                    </Box>
+                        <Typography
+                          variant="body2"
+                          textAlign={"left"}
+                          className={classes.para}
+                          fontWeight={500}
+                          fontSize={12}
+                          color={"#757575"}
+                        >
+                          Trigger Percent:
+                        </Typography>
+                        <Input
+                          type="number"
+                          disableUnderline
+                          value={userTradeSettings?.buyThresold}
+                          fullWidth
+                          placeholder="10"
+                          onChange={(e) => handlePercentage(e)}
+                          style={{ fontSize: 22, fontWeight: 600 }}
+                        />
+                      </Box>
+                    </Grid>
                   </Grid>
 
                   {/* <Box display={"flex"} justifyContent="space-around" mt={2}>
@@ -677,174 +675,190 @@ const StakePopup = ({
                     </Box>
                   </div>
 
-                  <Box
-                    display={"flex"}
-                    justifyContent={"space-between"}
-                    mt={2}
-                    style={{
-                      border: "1px solid rgba(106, 85, 234,0.2)",
-                      padding: "6px 20px 6px 20px",
-
-                      borderRadius: 10,
-                      backgroundColor: "rgba(106, 85, 234,0.03)",
-                    }}
-                  >
-                    <Box>
+                  <Box>
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      mt={3}
+                      style={{
+                        border: "1px solid rgba(106, 85, 234,0.1)",
+                        padding: "10px 10px 10px 10px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        <img
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/money-investment-4609432-3811559.png"
+                          alt="USDT"
+                          height="25px"
+                          style={{ marginRight: 10 }}
+                        />{" "}
+                        Total Investment
+                      </Typography>
                       <Typography
                         variant="body2"
-                        textAlign={"left"}
                         className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
-                      >
-                        Amount:
-                      </Typography>
-                      <Input
-                        value={fromWei(
-                          userStaked?.usdtBalance,
-                          poolToken?.decimals
-                        )}
-                        fullWidth
-                        placeholder="0"
-                        style={{ fontSize: 24, fontWeight: 600 }}
-                      />
-                    </Box>
-                    <Box>
-                      {/* <Typography
-                        variant="body2"
-                        textAlign={"left"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
-                      >
-                        Available:{" "}
-                        {formatCurrency(
-                          fromWei(tokenBalance, poolToken.decimals)
-                        )}
-                      </Typography> */}
-                      <Box
+                        textAlign="center"
+                        fontWeight={700}
+                        fontSize={22}
+                        ml={1}
                         display="flex"
-                        flexDirection={"row"}
-                        justifyContent="center"
-                        alignItems="center"
+                        alignItems={"center"}
                       >
-                        <Box
-                          display="flex"
-                          flexDirection={"row"}
-                          justifyContent="flex-start"
-                          alignItems="center"
+                        {fromWei(userStaked?.staked, poolToken.decimals)}{" "}
+                        <span
+                          style={{
+                            paddingLeft: 10,
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: "#454545",
+                          }}
                         >
                           <img
-                            src="https://cdn3d.iconscout.com/3d/premium/thumb/usdt-coin-4999518-4160019.png"
+                            src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
                             alt="USDT"
-                            height="30px"
+                            height="20px"
                           />{" "}
-                        </Box>
-                        <Typography
-                          variant="body2"
-                          className={classes.para}
-                          fontSize={20}
-                          textAlign="left"
-                          fontWeight={600}
-                          ml={1}
-                        >
                           USDT
-                        </Typography>
-                      </Box>
+                        </span>
+                      </Typography>
                     </Box>
-                  </Box>
-
-                  <Box
-                    display={"flex"}
-                    justifyContent={"space-between"}
-                    mt={2}
-                    style={{
-                      border: "1px solid rgba(106, 85, 234,0.2)",
-                      padding: "6px 20px 6px 20px",
-
-                      borderRadius: 10,
-                      backgroundColor: "rgba(106, 85, 234,0.03)",
-                    }}
-                  >
-                    <Box>
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      mt={2}
+                      style={{
+                        border: "1px solid rgba(106, 85, 234,0.1)",
+                        padding: "10px 10px 10px 10px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        <img
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/hand-with-bitcoin-4228550-3517325.png"
+                          alt="USDT"
+                          height="25px"
+                          style={{ marginRight: 10 }}
+                        />{" "}
+                        Earnings
+                      </Typography>
                       <Typography
                         variant="body2"
-                        textAlign={"left"}
                         className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
-                      >
-                        Amount:
-                      </Typography>
-                      <Input
-                        value={fromWei(userStaked?.tokenBalance, 18)}
-                        // onInput={(event) => setAmount(event.target.value)}
-                        disableUnderline
-                        fullWidth
-                        placeholder="0"
-                        style={{ fontSize: 24, fontWeight: 600 }}
-                      />
-                    </Box>
-                    <Box>
-                      {/* <Typography
-                        variant="body2"
-                        textAlign={"left"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
-                      >
-                        Available:{" "}
-                        {formatCurrency(
-                          fromWei(tokenBalance, poolToken.decimals)
-                        )}
-                      </Typography> */}
-                      <Box
+                        textAlign="center"
+                        fontWeight={700}
+                        fontSize={22}
+                        color="#333333"
+                        ml={1}
                         display="flex"
-                        flexDirection={"row"}
-                        justifyContent="center"
-                        alignItems="center"
+                        alignItems={"center"}
                       >
-                        <Box
-                          display="flex"
-                          flexDirection={"row"}
-                          justifyContent="flex-start"
-                          alignItems="center"
+                        {fromWei(userStaked?.earnings, poolToken.decimals)}
+                        <span
+                          style={{
+                            paddingLeft: 10,
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: "#454545",
+                          }}
                         >
                           <img
-                            src="https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880"
-                            alt="ETH"
-                            height="30px"
+                            src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                            alt="USDT"
+                            height="20px"
                           />{" "}
-                        </Box>
-                        <Typography
-                          variant="body2"
-                          className={classes.para}
-                          fontSize={20}
-                          textAlign="left"
-                          fontWeight={600}
-                          ml={1}
+                          USDT
+                        </span>
+                      </Typography>
+                    </Box>
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      mt={2}
+                      style={{
+                        border: "1px solid rgba(106, 85, 234,0.1)",
+                        padding: "10px 10px 10px 10px",
+                        borderRadius: 10,
+                        backgroundColor: "rgba(106, 85, 234,0.03)",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        className={classes.para}
+                        textAlign="center"
+                        fontSize={14}
+                        fontWeight={400}
+                        ml={1}
+                      >
+                        <img
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/international-currency-4037750-3342182@0.png"
+                          alt="Pool"
+                          height="25px"
+                          style={{ marginRight: 10 }}
+                        />
+                        Amount in pool
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className={classes.para}
+                        textAlign="center"
+                        fontWeight={700}
+                        fontSize={22}
+                        color="#333333"
+                        ml={1}
+                        display="flex"
+                        alignItems={"center"}
+                      >
+                        {fromWei(userStaked?.earnings, poolToken.decimals)}
+                        <span
+                          style={{
+                            paddingLeft: 10,
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: "#454545",
+                          }}
                         >
-                          ETH
-                        </Typography>
-                      </Box>
+                          <img
+                            src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                            alt="USDT"
+                            height="20px"
+                          />{" "}
+                          USDT
+                        </span>
+                      </Typography>
                     </Box>
                   </Box>
-                  <Box
-                    mt={2}
-                    style={{
-                      border: "1px solid rgba(106, 85, 234,0.2)",
-                      padding: "6px 30px 6px 30px",
-                      borderRadius: 10,
-                      backgroundColor: "rgba(106, 85, 234,0.03)",
-                    }}
-                  ></Box>
-                  <Box></Box>
-
-                  <Box display={"flex"} justifyContent="space-around" mt={2}>
+                  <div className="d-flex justify-content-center mt-3">
+                    <Typography
+                      variant="h6"
+                      className={classes.para}
+                      style={{ width: "80%" }}
+                      textAlign="center"
+                      fontSize={14}
+                      fontWeight={400}
+                    >
+                      Withdrawl of funds from the pool will terminate the
+                      stratedy and you will recieve all your available funds +
+                      profit/loss.
+                    </Typography>
+                  </div>
+                  {/* <Box display={"flex"} justifyContent="space-around" mt={2}>
                     <Box>
                       <Typography
                         variant="body2"
@@ -889,7 +903,7 @@ const StakePopup = ({
                         {userStaked?.completedSellOrders || 0}
                       </Typography>
                     </Box>
-                  </Box>
+                  </Box> */}
 
                   <div className="text-center">
                     <button

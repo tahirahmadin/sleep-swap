@@ -130,9 +130,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 500,
     marginTop: 20,
     padding: "10px 40px 10px 40px",
-    "&:hover": {
-      background: theme.palette.primary.main,
-    },
+
     [theme.breakpoints.down("md")]: {
       padding: "12px 20px 12px 20px",
       fontSize: 18,
