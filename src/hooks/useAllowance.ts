@@ -62,9 +62,11 @@ export function useTokenAllowance(
     try {
       const _allowance = await Web3Api.token.getTokenAllowance(options);
 
+      console.log("fetched allowance ", _allowance);
+
       setAllowance(new BigNumber(_allowance?.allowance).gt(0) ? true : false);
     } catch (error) {
-      console.log("allowance error ", error);
+      console.log("fetchTokenAllowance allowance error ", error);
     }
   };
 
