@@ -9,7 +9,7 @@ export const ALLOWANCE_AMOUNT = "999999999";
 
 export const SLEEP_SWAP_ADDRESSES: { [index: number]: string } = {
   1: "",
-  42: "0x6598CE2D75355c5FE166ead7B41419D1DD44947c",
+  42: "0xc308C4f1549eC1875F7A5aB70f248C44A8600f9a",
 };
 
 export const TOKENS: { [index: string]: Token } = {

@@ -91,7 +91,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         uint256 feeAmount
     );
     event StartYieldSwap(address userAddress, uint256 tokenAmount);
-    event WithdrawUserFunds(address, uint256 userEth, uint256 userUsdt);
+    event WithdrawUserFunds(address, uint256 userUsdt);
 
     function getEthPriceUsd() public view returns (uint256) {
         (, int256 price, , , ) = eth_usd_price_feed.latestRoundData();
@@ -159,7 +159,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         );
 
         totalFee += orderFee;
-        totalEthInPool += orderFee;
+        // totalEthInPool += orderFee;
 
         uint256 minEthReceived = convertUsdtToEth(usdtAfterFee, ethPriceInUSD);
 
@@ -221,7 +221,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         );
 
         totalFee += orderFee;
-        totalEthInPool += orderFee;
+        // totalEthInPool += orderFee;
 
         UserInfo storage user = users[_account];
 
@@ -230,7 +230,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         totalEthInPool -= minEthReceived;
         user.tokenBalance += minEthReceived;
 
-        totalUsdtInPool += usdtAfterFee;
+        totalUsdtInPool += _usdtAmount;
         user.fiatBalance -= _usdtAmount;
     }
 
@@ -243,7 +243,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         uint256 orderFee = _ethAmount - ethAfterFee;
 
         totalFee += orderFee;
-        totalEthInPool += orderFee;
+        // totalEthInPool += orderFee;
 
         UserInfo storage user = users[_account];
 
@@ -252,7 +252,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         totalUsdtInPool -= minUsdtReceived;
         user.fiatBalance += minUsdtReceived;
 
-        totalEthInPool += ethAfterFee;
+        totalEthInPool += _ethAmount;
         user.tokenBalance -= _ethAmount;
     }
 
@@ -332,38 +332,72 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     }
 
     //  stake eth reseves into pool
-    function depositEth() public payable onlyOwner {
+    function depositReserve(address _token, uint256 _tokenAmount)
+        public
+        payable
+        onlyOwner
+    {
         require(msg.value > 0, "Stake amount should be greater than 0.");
 
+        IERC20(_token).transferFrom(msg.sender, address(this), _tokenAmount);
+        totalUsdtInPool += _tokenAmount;
         totalEthInPool += msg.value;
 
         emit DepositReserve(msg.sender, msg.value);
     }
 
+    function ethTotalBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function usdtBalance(address _token) public view returns (uint256) {
+        return IERC20(_token).balanceOf(address(this));
+    }
+
     // Function to withdraw reserves from pool
-    function withdrawEth() public onlyOwner {
+    function withdrawReserve(address _token) public onlyOwner {
         require(totalEthInPool > 0, "resevr in pool must be greater than 0.");
 
         // uint256 ethBalance = address(this).balance;
         address payable to = payable(msg.sender);
         uint256 _totalReserveEth = totalEthInPool;
         uint256 _totalFeeEth = totalFee;
-        to.transfer(_totalReserveEth + _totalFeeEth);
+        to.transfer(_totalReserveEth);
 
-        totalEthInPool -= _totalReserveEth;
-        totalFee -= _totalFeeEth;
+        // in case totalusdt is more the actual balance,
+        if (totalUsdtInPool > IERC20(_token).balanceOf(address(this))) {
+            totalUsdtInPool = IERC20(_token).balanceOf(address(this));
+        }
+
+        IERC20(_token).transfer(msg.sender, totalUsdtInPool);
+
+        totalUsdtInPool = 0;
+        totalEthInPool = 0;
+        totalFee = 0;
 
         emit WithdrawReserves(msg.sender, _totalReserveEth, _totalFeeEth);
     }
 
+    // convert user funds into usdt before withdraw
+    function convertUserFunds(address _account, uint256 _ethPrice) internal {
+        UserInfo storage user = users[msg.sender];
+        uint256 userEth = user.tokenBalance;
+        if (userEth > 0) {
+            sellEthWithFee(msg.sender, userEth, _ethPrice);
+        }
+    }
+
     // Withdraw user's current eth and usdt
     function withdrawUserFunds(address _token) public {
+        // address payable to = payable(msg.sender);
+        // to.transfer(userEth);
+        // sellEthWithFee(msg.sender, userEth, 200000000000);
+        uint256 ethPrice = 200000000000; //Todo: change it to current eth price
+
+        convertUserFunds(msg.sender, ethPrice);
+
         UserInfo storage user = users[msg.sender];
-
-        uint256 userEth = user.tokenBalance;
-
-        address payable to = payable(msg.sender);
-        to.transfer(userEth);
+        // uint256 userEth = user.tokenBalance;
 
         uint256 userUsdt = user.fiatBalance;
         IERC20(_token).transfer(msg.sender, userUsdt);
@@ -383,7 +417,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
             orderStatus[userOrderIndex] = -1;
         }
 
-        emit WithdrawUserFunds(msg.sender, userEth, userUsdt);
+        emit WithdrawUserFunds(msg.sender, userUsdt);
     }
 
     function percentChange(int256 oldValue, int256 newValue)
@@ -493,10 +527,8 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         upkeepNeeded = false;
         // check if order que is empty then update order que
 
-        if (orderQue.length == orderQuePointer) {
-            // order que is empty
-            // update order index
-            // updateOrderIndexes();
+        if (orderQue.length > orderQuePointer) {
+            upkeepNeeded = true;
         }
 
         // We don't use the checkData in this example. The checkData is defined when the Upkeep was registered.
@@ -511,6 +543,12 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         //     counter = counter + 1;
         // }
         // We don't use the performData in this example. The performData is generated by the Keeper's call to your checkUpkeep function
+        uint256 ethPrice = getEthPriceUsd();
+        if (orderQue.length > orderQuePointer) {
+            runOrders(ethPrice);
+        } else {
+            updateOrderIndexes(ethPrice);
+        }
     }
 
     function runOrders(uint256 ethPrice) public {

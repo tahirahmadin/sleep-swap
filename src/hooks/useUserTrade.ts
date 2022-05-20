@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SLEEP_SWAP_ADDRESSES } from "../constants";
-import { useChain, useMoralis, useMoralisWeb3Api } from "react-moralis";
+import { useChain, useMoralis } from "react-moralis";
 
 import sleepAbi from "../contracts/abi/sleepSwap.json";
 import {
@@ -30,7 +30,7 @@ export function useUserTrade(
     undefined
   ); // fetch user trade info on each block update
   const { Moralis } = useMoralis();
-  const Web3Api = useMoralisWeb3Api();
+
   const [transactionState, setTrxState] = useState<TransactionStatus>({
     status: 0,
     hash: null,
@@ -114,7 +114,6 @@ export function useUserTrade(
   };
 
   const fetchUserTradeInfo = async () => {
-    console.log("fetching new trade info ", { account });
     const readOptions0: any = {
       contractAddress: SLEEP_SWAP_ADDRESSES?.[42],
       functionName: "getUserInfo",
@@ -138,7 +137,7 @@ export function useUserTrade(
         Moralis.executeFunction(readOptions0),
         Moralis.executeFunction(readOptions1),
       ]);
-      console.log("user Trade info", info);
+
       setTradeInfo({
         staked: info?._totalStaked?.toString(),
         tokenBalance: info?._tokenBalance?.toString(),

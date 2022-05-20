@@ -226,6 +226,8 @@ const StakePopup = ({
   withdrawUserFunds,
   transactionState,
   resetTrxState,
+  userTotalValueInPool,
+  totalEarnings,
 }) => {
   const classes = useStyles();
 
@@ -265,7 +267,7 @@ const StakePopup = ({
     }
 
     withdrawUserFunds();
-  }, [userStaked]);
+  }, [userStaked, withdrawUserFunds]);
 
   const marks = [
     {
@@ -368,7 +370,6 @@ const StakePopup = ({
                     >
                       Stake
                     </Typography>
-                    {console.log(grids)}
                     <Box
                       display="flex"
                       flexDirection={"row"}
@@ -767,7 +768,7 @@ const StakePopup = ({
                         display="flex"
                         alignItems={"center"}
                       >
-                        {fromWei(userStaked?.earnings, poolToken.decimals)}
+                        {totalEarnings}
                         <span
                           style={{
                             paddingLeft: 10,
@@ -823,7 +824,7 @@ const StakePopup = ({
                         display="flex"
                         alignItems={"center"}
                       >
-                        {fromWei(userStaked?.earnings, poolToken.decimals)}
+                        {userTotalValueInPool}
                         <span
                           style={{
                             paddingLeft: 10,
@@ -853,7 +854,8 @@ const StakePopup = ({
                     >
                       Withdrawl of funds from the pool will terminate the
                       stratedy and you will recieve all your available funds +
-                      profit/loss.
+                      profit/loss. buy {userStaked?.completedBuyOrders} - sell{" "}
+                      {userStaked?.completedSellOrders}
                     </Typography>
                   </div>
                   {/* <Box display={"flex"} justifyContent="space-around" mt={2}>

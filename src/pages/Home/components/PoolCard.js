@@ -122,6 +122,24 @@ export default function PoolCard() {
   ] = useUserTrade(poolToken.address);
   const [poolInfo, poolLoading] = usePoolInfo();
 
+  const userTotalValueInPool = useMemo(() => {
+    const totalEthUsd = new BigNumber(
+      fromWei(userStaked?.tokenBalance, ethToken.decimals)
+    ).multipliedBy(fromWei(poolInfo?.ethPriceUsd, 8));
+
+    return totalEthUsd
+      .plus(fromWei(userStaked?.usdtBalance, poolToken?.decimals))
+      .toFixed(3)
+      .toString();
+  }, [userStaked, poolInfo]);
+
+  const totalEarnings = useMemo(() => {
+    return new BigNumber(userTotalValueInPool)
+      .minus(fromWei(userStaked?.staked, poolToken?.decimals))
+      ?.toFixed(3)
+      .toString();
+  }, [userTotalValueInPool, userStaked, poolToken]);
+
   const totalPoolValueLocked = useMemo(() => {
     if (!poolInfo) {
       return "0";
@@ -284,7 +302,7 @@ export default function PoolCard() {
                 fontWeight={700}
                 ml={1}
               >
-                {fromWei(userStaked?.earnings, poolToken.decimals)}
+                {totalEarnings}
               </Typography>
             </Box>
           </Box>
@@ -304,6 +322,9 @@ export default function PoolCard() {
             ) : (
               <Button
                 onClick={handleAllowance}
+                disabled={
+                  approveTrxStatus?.status > 0 && approveTrxStatus?.status !== 4
+                }
                 style={{
                   borderRadius: 10,
                   background: "#6A55EA",
@@ -331,6 +352,8 @@ export default function PoolCard() {
         withdrawUserFunds={withdrawUserFunds}
         transactionState={transactionState}
         resetTrxState={resetTrxState}
+        userTotalValueInPool={userTotalValueInPool}
+        totalEarnings={totalEarnings}
       />
     </Box>
   );
