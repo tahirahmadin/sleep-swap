@@ -14,9 +14,7 @@ import {
 import { makeStyles } from "@mui/styles";
 import { Close } from "@mui/icons-material";
 import { useMoralis, useMoralisWeb3Api } from "react-moralis";
-import Web3 from "web3";
 import TxPopup from "../../../common/TxPopup";
-import { useUserTrade } from "../../../hooks/useUserTrade";
 import { formatCurrency, fromWei, toWei } from "../../../utils/helper";
 import BigNumber from "bignumber.js";
 import { useTokenBalance } from "../../../hooks/useBalance";
@@ -228,6 +226,8 @@ const StakePopup = ({
   withdrawUserFunds,
   transactionState,
   resetTrxState,
+  userTotalValueInPool,
+  totalEarnings,
 }) => {
   const classes = useStyles();
 
@@ -267,7 +267,7 @@ const StakePopup = ({
     }
 
     withdrawUserFunds();
-  }, [userStaked]);
+  }, [userStaked, withdrawUserFunds]);
 
   const marks = [
     {
@@ -353,7 +353,7 @@ const StakePopup = ({
       <div className={classes.background}>
         {new BigNumber(userStaked?.staked).eq(0) || !userStaked?.staked ? (
           <div className={classes.container}>
-            {transactionState?.state === 0 && (
+            {transactionState?.status === 0 && (
               <div className="h-100 w-100">
                 <div
                   className="d-flex justify-content-end"
@@ -370,7 +370,6 @@ const StakePopup = ({
                     >
                       Stake
                     </Typography>
-                    {console.log(grids)}
                     <Box
                       display="flex"
                       flexDirection={"row"}
@@ -613,9 +612,9 @@ const StakePopup = ({
               </div>
             )}
 
-            {transactionState?.state > 0 && (
+            {transactionState?.status > 0 && (
               <TxPopup
-                txCase={transactionState?.state}
+                txCase={transactionState?.status}
                 hash={transactionState?.hash}
                 resetPopup={resetPopup}
               />
@@ -623,7 +622,7 @@ const StakePopup = ({
           </div>
         ) : (
           <div className={classes.container}>
-            {transactionState?.state === 0 && (
+            {transactionState?.status === 0 && (
               <div className="h-100 w-100">
                 <div
                   className="d-flex justify-content-end"
@@ -769,7 +768,7 @@ const StakePopup = ({
                         display="flex"
                         alignItems={"center"}
                       >
-                        {fromWei(userStaked?.earnings, poolToken.decimals)}
+                        {totalEarnings}
                         <span
                           style={{
                             paddingLeft: 10,
@@ -825,7 +824,7 @@ const StakePopup = ({
                         display="flex"
                         alignItems={"center"}
                       >
-                        {fromWei(userStaked?.earnings, poolToken.decimals)}
+                        {userTotalValueInPool}
                         <span
                           style={{
                             paddingLeft: 10,
@@ -855,7 +854,8 @@ const StakePopup = ({
                     >
                       Withdrawl of funds from the pool will terminate the
                       stratedy and you will recieve all your available funds +
-                      profit/loss.
+                      profit/loss. buy {userStaked?.completedBuyOrders} - sell{" "}
+                      {userStaked?.completedSellOrders}
                     </Typography>
                   </div>
                   {/* <Box display={"flex"} justifyContent="space-around" mt={2}>
@@ -917,9 +917,9 @@ const StakePopup = ({
               </div>
             )}
 
-            {transactionState?.state > 0 && (
+            {transactionState?.status > 0 && (
               <TxPopup
-                txCase={transactionState?.state}
+                txCase={transactionState?.status}
                 hash={transactionState?.hash}
                 resetPopup={resetPopup}
               />

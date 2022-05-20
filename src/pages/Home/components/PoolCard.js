@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import StakePopup from "./StakePopup";
@@ -108,7 +108,7 @@ export default function PoolCard() {
   const poolToken = TOKENS?.["USDT"];
   const ethToken = TOKENS?.["ETH"];
 
-  const [allowance, confirmAllowance, approvalLoading] = useTokenAllowance(
+  const [allowance, confirmAllowance, approveTrxStatus] = useTokenAllowance(
     poolToken.address
   );
 
@@ -121,6 +121,24 @@ export default function PoolCard() {
     resetTrxState,
   ] = useUserTrade(poolToken.address);
   const [poolInfo, poolLoading] = usePoolInfo();
+
+  const userTotalValueInPool = useMemo(() => {
+    const totalEthUsd = new BigNumber(
+      fromWei(userStaked?.tokenBalance, ethToken.decimals)
+    ).multipliedBy(fromWei(poolInfo?.ethPriceUsd, 8));
+
+    return totalEthUsd
+      .plus(fromWei(userStaked?.usdtBalance, poolToken?.decimals))
+      .toFixed(3)
+      .toString();
+  }, [userStaked, poolInfo]);
+
+  const totalEarnings = useMemo(() => {
+    return new BigNumber(userTotalValueInPool)
+      .minus(fromWei(userStaked?.staked, poolToken?.decimals))
+      ?.toFixed(3)
+      .toString();
+  }, [userTotalValueInPool, userStaked, poolToken]);
 
   const totalPoolValueLocked = useMemo(() => {
     if (!poolInfo) {
@@ -137,6 +155,10 @@ export default function PoolCard() {
       .toFixed(3)
       .toString();
   }, [poolInfo]);
+
+  const handleAllowance = useCallback(() => {
+    confirmAllowance();
+  }, [confirmAllowance]);
 
   return (
     <Box>
@@ -280,7 +302,7 @@ export default function PoolCard() {
                 fontWeight={700}
                 ml={1}
               >
-                {fromWei(userStaked?.earnings, poolToken.decimals)}
+                {totalEarnings}
               </Typography>
             </Box>
           </Box>
@@ -299,7 +321,10 @@ export default function PoolCard() {
               </Button>
             ) : (
               <Button
-                onClick={() => confirmAllowance()}
+                onClick={handleAllowance}
+                disabled={
+                  approveTrxStatus?.status > 0 && approveTrxStatus?.status !== 4
+                }
                 style={{
                   borderRadius: 10,
                   background: "#6A55EA",
@@ -307,7 +332,9 @@ export default function PoolCard() {
                   color: "white",
                 }}
               >
-                {approvalLoading ? "waiting..." : "Approve USDT"}
+                {approveTrxStatus?.status > 0 && approveTrxStatus?.status !== 4
+                  ? "Approving..."
+                  : "Approve USDT"}
               </Button>
             )}
           </Box>
@@ -325,6 +352,8 @@ export default function PoolCard() {
         withdrawUserFunds={withdrawUserFunds}
         transactionState={transactionState}
         resetTrxState={resetTrxState}
+        userTotalValueInPool={userTotalValueInPool}
+        totalEarnings={totalEarnings}
       />
     </Box>
   );
