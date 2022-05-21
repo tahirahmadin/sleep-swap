@@ -15,7 +15,7 @@ export function useUserTrade(
   | [
       UserStakedInfo | undefined,
       UserTradeSettings | undefined,
-      (amount: string) => {},
+      (amount: string, grids: number, percent: number) => {},
       () => {},
       TransactionStatus,
       () => void
@@ -38,7 +38,7 @@ export function useUserTrade(
 
   const sleepSwapAddress = SLEEP_SWAP_ADDRESSES?.[42];
   const startTradeOrder = useCallback(
-    async (amount: string) => {
+    async (amount: string, grids: number, percent: number) => {
       try {
         setTrxState({ status: 1, hash: null });
         const sendOptions: any = {
@@ -47,8 +47,9 @@ export function useUserTrade(
           abi: sleepAbi,
           params: {
             _token: token,
-            _tokenAmount: parseInt(amount),
-            ethPriceInUSD: 200000000000, // temp params for testing only
+            _tokenAmount: amount,
+            _gridCount: grids,
+            _percentChange: percent,
           },
         };
         const transaction: any = await Moralis.executeFunction(sendOptions);
