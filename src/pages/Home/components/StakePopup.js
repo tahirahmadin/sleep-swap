@@ -231,10 +231,10 @@ const StakePopup = ({
 }) => {
   const classes = useStyles();
 
-  const { user, logout, isAuthenticated } = useMoralis();
+  // const { user, logout, isAuthenticated } = useMoralis();
 
-  const Web3Api = useMoralisWeb3Api();
-  const userAddress = user ? user.attributes.ethAddress : "...";
+  // const Web3Api = useMoralisWeb3Api();
+  // const userAddress = user ? user.attributes.ethAddress : "...";
 
   const tokenBalance = useTokenBalance(poolToken?.address);
 
@@ -243,8 +243,8 @@ const StakePopup = ({
   }, [tokenBalance]);
 
   const [amount, setAmount] = useState("");
-  const [percent, setPercent] = useState("");
-  const [grids, setGrids] = useState("");
+  const [percent, setPercent] = useState(10);
+  const [grids, setGrids] = useState(5);
 
   const resetPopup = () => {
     setStakePopup(false);
@@ -252,13 +252,22 @@ const StakePopup = ({
   };
 
   const handleStake = useCallback(() => {
-    console.log("calling trade callback", amount);
     if (new BigNumber(toWei(amount, poolToken.decimals)).lte(0)) {
+      console.log("invalid token amount");
       return;
     }
 
-    console.log("calling trade callback", toWei(amount, poolToken.decimals));
-    startTradeOrder(toWei(amount, poolToken.decimals));
+    console.log("calling trade callback", { grids, percent });
+    if (!grids || !percent) {
+      console.log("Invalid grid or percent");
+      return;
+    }
+
+    startTradeOrder(
+      toWei(amount, poolToken.decimals),
+      parseInt(grids),
+      parseInt(percent)
+    );
   }, [amount, startTradeOrder]);
 
   const handleWithdraw = useCallback(() => {
@@ -514,7 +523,7 @@ const StakePopup = ({
                           Grids:
                         </Typography>
                         <Slider
-                          defaultValue={userTradeSettings?.grids}
+                          defaultValue={5}
                           getAriaValueText={valuetext}
                           step={null}
                           marks={marks}
@@ -543,7 +552,7 @@ const StakePopup = ({
                         <Input
                           type="number"
                           disableUnderline
-                          value={userTradeSettings?.buyThresold}
+                          value={percent}
                           fullWidth
                           placeholder="10"
                           onChange={(e) => handlePercentage(e)}

@@ -120,19 +120,6 @@
   },
   {
     "inputs": [],
-    "name": "buySellSteps",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "interval",
     "outputs": [
       {
@@ -320,19 +307,6 @@
   },
   {
     "inputs": [],
-    "name": "strategyPercent",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "totalEthInPool",
     "outputs": [
       {
@@ -439,7 +413,7 @@
   },
   {
     "inputs": [],
-    "name": "getEthPriceUsd",
+    "name": "getPriceUsd",
     "outputs": [
       {
         "internalType": "uint256",
@@ -501,25 +475,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_percent",
-        "type": "uint256"
-      }
-    ],
-    "name": "UpdateStrategyPercentage",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "_token",
         "type": "address"
@@ -528,6 +483,16 @@
         "internalType": "uint256",
         "name": "_tokenAmount",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_gridCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "int256",
+        "name": "_percentChange",
+        "type": "int256"
       }
     ],
     "name": "startYieldSwap",

@@ -19,11 +19,16 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     uint256 priceFeedDecimals = 10**8;
     uint256 ethDecimals = 10**18; // eth decimals
     uint256 tokenDecimals = 10**6; // usdt token decimals
+    // polygon: 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+    // koven: 0xa36085F69e2889c224210F603D836748e7dC0088
+    address LINK = 0xa36085F69e2889c224210F603D836748e7dC0088;
 
-    AggregatorV3Interface internal eth_usd_price_feed;
+    AggregatorV3Interface internal matic_usd_price_feed;
+    // AggregatorV3Interface internal link_matic_price_feed;
+    // AggregatorV3Interface internal matic_usd_price_feed;
 
-    uint256 public strategyPercent = 2;
-    uint256 public buySellSteps = 5;
+    // uint256 public strategyPercent = 2;
+    // uint256 public buySellSteps = 5;
     address public manager;
 
     struct UserInfo {
@@ -53,10 +58,10 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     mapping(uint256 => uint256[]) orderCurrentBuySellGridCounts; // 0: buyCounts, 1: sellCounts
 
     // percent change for buy and sell on orders for each user
-    mapping(address => uint256[]) userBuySellChange;
+    mapping(address => int256) userBuySellChange;
 
     // number of steps for buy and sell defined buy users
-    mapping(address => uint256[]) userBuySellGridSize;
+    mapping(address => uint256) userBuySellGridSize;
 
     uint256[] public orderQue; // store list of order indexes to execute
     uint256[] public orderTypes; // 0 buy/   1 sell
@@ -66,15 +71,19 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
      * Network: Koven Testnet
      */
 
-    address internal ethUsdDataFeedKoven =
+    //mumbai:  0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada
+    address internal maticUsdDataFeed =
         0x9326BFA02ADD2366b30bacB125260Af641031331;
-    address internal maticUsdDataFeedMumbai =
-        0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada;
+
+    // // link-usdt; koven: 	0x396c5E36DD0a0F5a5D33dae44368D4193f69a1F0
+    // // link-matic: mumbai 0x12162c3E810393dEC01362aBf156D7ecf6159528
+    // address internal linkMaticDataFeedMumbai =
+    //     0x396c5E36DD0a0F5a5D33dae44368D4193f69a1F0;
 
     uint256 public totalFee;
 
     constructor() {
-        eth_usd_price_feed = AggregatorV3Interface(ethUsdDataFeedKoven);
+        matic_usd_price_feed = AggregatorV3Interface(maticUsdDataFeed);
 
         manager = msg.sender;
 
@@ -93,9 +102,12 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     event StartYieldSwap(address userAddress, uint256 tokenAmount);
     event WithdrawUserFunds(address, uint256 userUsdt);
 
-    function getEthPriceUsd() public view returns (uint256) {
-        (, int256 price, , , ) = eth_usd_price_feed.latestRoundData();
-        return price.toUint256();
+    function getPriceUsd() public view returns (uint256) {
+        (, int256 priceUsd, , , ) = matic_usd_price_feed.latestRoundData();
+
+        // (, int256 maticUsdPrice, , , ) = matic_usd_price_feed.latestRoundData();
+        // return  linkMaticPrice.mul(maticUsdPrice).div(priceFeedDecimals); // use this for polygon chain
+        return priceUsd.toUint256();
     }
 
     // get usdt equivalent eth amount based on current eth price
@@ -123,26 +135,19 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
             );
     }
 
-    // Write methods
-
-    // 4. Update Strategy Percentage
-    // 5. withdraw user tokens
-
-    function UpdateStrategyPercentage(uint256 _percent)
-        public
-        onlyOwner
-        returns (uint256)
-    {
-        strategyPercent = _percent;
-        emit UpdateStrategy(_percent);
-        return _percent;
-    }
-
     // Function to deposit fiat into pool
-    function startYieldSwap(address _token, uint256 _tokenAmount) public {
+    function startYieldSwap(
+        address _token,
+        uint256 _tokenAmount,
+        uint256 _gridCount,
+        int256 _percentChange
+    ) public {
         require(_tokenAmount > 0, "Stake amount should be greater than 0.");
 
-        uint256 ethPriceInUSD = getEthPriceUsd();
+        require(_gridCount >= 3, "Grid count must be greater than 3");
+        require(_percentChange >= 10, "percent must be greater than 10");
+
+        uint256 ethPriceInUSD = getPriceUsd();
         // buy eth with half of the _tokenAmount, with current eth price
         uint256 usdtAmountForEth = _tokenAmount.div(2);
         uint256 remainingUsdt = _tokenAmount - usdtAmountForEth;
@@ -172,11 +177,11 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         totalUsdtInPool += usdtAfterFee;
 
         user.fiatBalance += remainingUsdt;
-        user.fiatAmountForEachOrder = user.fiatBalance.div(buySellSteps);
+        user.fiatAmountForEachOrder = user.fiatBalance.div(_gridCount);
 
         totalEthInPool -= minEthReceived;
         user.tokenBalance += minEthReceived;
-        user.ethAmountForEachOrder = user.tokenBalance.div(buySellSteps);
+        user.ethAmountForEachOrder = user.tokenBalance.div(_gridCount);
 
         user.depositTimeStamp = block.timestamp;
         user.lastEthPrice = ethPriceInUSD;
@@ -200,6 +205,9 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         userOrders[msg.sender] = orderIndex;
 
         orderStatus[orderIndex] = 0;
+
+        userBuySellGridSize[msg.sender] = _gridCount;
+        userBuySellChange[msg.sender] = _percentChange;
         // configure order and mappings end
 
         emit StartYieldSwap(msg.sender, _tokenAmount);
@@ -267,7 +275,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         _totalFee = totalFee;
         _totalUsdt = totalUsdtInPool;
         _totalOrders = orderQue.length;
-        _ethPrice = getEthPriceUsd();
+        _ethPrice = getPriceUsd();
         return (
             _totalEthReserve,
             _totalFee,
@@ -296,7 +304,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         _fiatBalance = user.fiatBalance;
 
         uint256 usdtValue = _fiatBalance.div(tokenDecimals);
-        uint256 ethValue = _tokenBalance.mul(getEthPriceUsd()).div(ethDecimals);
+        uint256 ethValue = _tokenBalance.mul(getPriceUsd()).div(ethDecimals);
         totalUsdValue = usdtValue + ethValue;
         _usdtOrderAmount = user.fiatAmountForEachOrder;
         _ethOrderAmount = user.ethAmountForEachOrder;
@@ -333,7 +341,11 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         payable
         onlyOwner
     {
-        require(msg.value > 0, "Stake amount should be greater than 0.");
+        require(msg.value > 0, "matic amount should be greater than 0.");
+        require(
+            _tokenAmount > 0,
+            "tokenAmount amount should be greater than 0."
+        );
 
         IERC20(_token).transferFrom(msg.sender, address(this), _tokenAmount);
         totalUsdtInPool += _tokenAmount;
@@ -342,10 +354,12 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         emit DepositReserve(msg.sender, msg.value);
     }
 
+    // test fn remove after test
     function ethTotalBalance() public view returns (uint256) {
         return address(this).balance;
     }
 
+    // test fn remove after test
     function usdtBalance(address _token) public view returns (uint256) {
         return IERC20(_token).balanceOf(address(this));
     }
@@ -440,11 +454,15 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
             uint256 _sellCount;
             (_buyCount, _sellCount) = getUserOrderStatus(orderUser);
 
-            if (priceChange >= 10 && _sellCount < buySellSteps) {
+            int256 _userPriceChange = userBuySellChange[orderUser];
+            uint256 _userGridSize = userBuySellGridSize[orderUser];
+            if (priceChange >= _userPriceChange && _sellCount < _userGridSize) {
                 // sell order
                 orderQue.push(i);
                 orderTypes.push(1);
-            } else if (priceChange <= -10 && _buyCount < buySellSteps) {
+            } else if (
+                priceChange <= -_userPriceChange && _buyCount < _userGridSize
+            ) {
                 // buy order
                 orderQue.push(i);
                 orderTypes.push(0);
@@ -452,8 +470,6 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         }
     }
 
-    // add this check before executing runOrder function
-    //  if(_orderGridStatus[0] >=  buySellSteps  or _orderGridStatus[1] >=  buySellSteps)
     // step 2 iterate order que and run orders
     function runOrder(
         uint256 _orderIndex,
@@ -472,6 +488,8 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
             _orderIndex
         ];
 
+        uint256 _userGridSize = userBuySellGridSize[userAddress];
+
         require(
             orderStatus[_orderIndex] == 0,
             "Order is either completed or cancelled"
@@ -480,7 +498,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         if (orderTypes[_queIndex] == 0) {
             // run buy order
             require(
-                _orderGridStatus[0] < buySellSteps,
+                _orderGridStatus[0] < _userGridSize,
                 "All Buy order has been already executed"
             );
 
@@ -495,7 +513,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         } else {
             //run sell order
             require(
-                _orderGridStatus[1] < buySellSteps,
+                _orderGridStatus[1] < _userGridSize,
                 "All Sell order has been already executed"
             );
 
@@ -541,7 +559,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         if ((block.timestamp - lastTimeStamp) > interval) {
             lastTimeStamp = block.timestamp;
 
-            uint256 ethPrice = getEthPriceUsd();
+            uint256 ethPrice = getPriceUsd();
             if (orderQue.length > orderQuePointer) {
                 runOrders(ethPrice);
 
