@@ -92,15 +92,28 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         totalUsdtInPool = 0;
     }
 
-    event UpdateStrategy(uint256 Percentage);
     event DepositReserve(address userAddress, uint256 ethAmount);
     event WithdrawReserves(
         address userAddress,
         uint256 ethAmount,
         uint256 feeAmount
     );
-    event StartYieldSwap(address userAddress, uint256 tokenAmount);
+    event StartYieldSwap(
+        address userAddress,
+        uint256 tokenAmount,
+        uint256 gridSize,
+        int256 percent,
+        uint256 ethPrice
+    );
     event WithdrawUserFunds(address, uint256 userUsdt);
+    event RunOrder(
+        address user,
+        string orderType,
+        uint256 ethPirce,
+        uint256 fromAmount,
+        uint256 toAmount,
+        uint256 fee
+    );
 
     function getPriceUsd() public view returns (uint256) {
         (, int256 priceUsd, , , ) = matic_usd_price_feed.latestRoundData();
@@ -210,7 +223,13 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         userBuySellChange[msg.sender] = _percentChange;
         // configure order and mappings end
 
-        emit StartYieldSwap(msg.sender, _tokenAmount);
+        emit StartYieldSwap(
+            msg.sender,
+            _tokenAmount,
+            _gridCount,
+            _percentChange,
+            ethPriceInUSD
+        );
     }
 
     function buyEthWithFee(
@@ -236,6 +255,15 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
 
         totalUsdtInPool += _usdtAmount;
         user.fiatBalance -= _usdtAmount;
+
+        emit RunOrder(
+            _account,
+            "buy",
+            _ethPrice,
+            _usdtAmount,
+            minEthReceived,
+            orderFee
+        );
     }
 
     function sellEthWithFee(
@@ -258,6 +286,15 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
 
         totalEthInPool += _ethAmount;
         user.tokenBalance -= _ethAmount;
+
+        emit RunOrder(
+            _account,
+            "sell",
+            _ethPrice,
+            _ethAmount,
+            minUsdtReceived,
+            orderFee
+        );
     }
 
     function getPoolInfo()
