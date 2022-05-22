@@ -3,7 +3,7 @@ import { makeStyles } from "@mui/styles";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import StakePopup from "./StakePopup";
 import { useMoralis } from "react-moralis";
-import { TOKENS } from "../../../constants";
+import { CHAIN, NATIVE_TOKEN, TOKENS } from "../../../constants";
 import { useChain } from "react-moralis";
 import { useTokenAllowance } from "../../../hooks/useAllowance";
 import { useUserTrade } from "../../../hooks/useUserTrade";
@@ -111,8 +111,8 @@ export default function PoolCard() {
   const [stakePopup, setStakePopup] = useState(false);
   const [txCase, setTxCase] = useState(0);
 
-  const poolToken = TOKENS?.["USDT"];
-  const ethToken = TOKENS?.["ETH"];
+  const poolToken = TOKENS?.[CHAIN]?.["USDT"];
+  const nativeToken = TOKENS?.[CHAIN]?.[NATIVE_TOKEN?.[CHAIN]];
 
   const [allowance, confirmAllowance, approveTrxStatus] = useTokenAllowance(
     poolToken.address
@@ -130,7 +130,7 @@ export default function PoolCard() {
 
   const userTotalValueInPool = useMemo(() => {
     const totalEthUsd = new BigNumber(
-      fromWei(userStaked?.tokenBalance, ethToken.decimals)
+      fromWei(userStaked?.tokenBalance, nativeToken.decimals)
     ).multipliedBy(fromWei(poolInfo?.ethPriceUsd, 8));
 
     return totalEthUsd
@@ -151,9 +151,9 @@ export default function PoolCard() {
       return "0";
     }
     const totalEthUsd = new BigNumber(
-      fromWei(poolInfo?.totalEthInPool, ethToken.decimals)
+      fromWei(poolInfo?.totalEthInPool, nativeToken.decimals)
     )
-      .plus(fromWei(poolInfo?.totalFee, ethToken.decimals))
+      .plus(fromWei(poolInfo?.totalFee, nativeToken.decimals))
       .multipliedBy(fromWei(poolInfo?.ethPriceUsd, 8));
 
     return totalEthUsd
@@ -368,7 +368,6 @@ export default function PoolCard() {
         setStakePopup={setStakePopup}
         stakePopup={stakePopup}
         poolToken={poolToken}
-        ethToken={ethToken}
         userStaked={userStaked}
         userTradeSettings={userTradeSettings}
         startTradeOrder={startTradeOrder}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { SLEEP_SWAP_ADDRESSES } from "../constants";
+import { CHAIN, SLEEP_SWAP_ADDRESSES } from "../constants";
 import { useChain, useMoralis } from "react-moralis";
 
 import sleepAbi from "../contracts/abi/sleepSwap.json";
@@ -36,7 +36,7 @@ export function useUserTrade(
     hash: null,
   });
 
-  const sleepSwapAddress = SLEEP_SWAP_ADDRESSES?.[42];
+  const sleepSwapAddress = SLEEP_SWAP_ADDRESSES?.[CHAIN];
   const startTradeOrder = useCallback(
     async (amount: string, grids: number, percent: number) => {
       try {
@@ -97,7 +97,7 @@ export function useUserTrade(
 
   const fetchUserTradeSettings = async () => {
     const readOptions: any = {
-      contractAddress: SLEEP_SWAP_ADDRESSES?.[42],
+      contractAddress: SLEEP_SWAP_ADDRESSES?.[CHAIN],
       functionName: "userTradeSettings",
       abi: sleepAbi,
       params: {
@@ -116,7 +116,7 @@ export function useUserTrade(
 
   const fetchUserTradeInfo = async () => {
     const readOptions0: any = {
-      contractAddress: SLEEP_SWAP_ADDRESSES?.[42],
+      contractAddress: SLEEP_SWAP_ADDRESSES?.[CHAIN],
       functionName: "getUserInfo",
       abi: sleepAbi,
       params: {
@@ -124,7 +124,7 @@ export function useUserTrade(
       },
     };
     const readOptions1: any = {
-      contractAddress: SLEEP_SWAP_ADDRESSES?.[42],
+      contractAddress: SLEEP_SWAP_ADDRESSES?.[CHAIN],
       functionName: "getUserOrderStatus",
       abi: sleepAbi,
       params: {

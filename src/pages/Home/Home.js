@@ -15,7 +15,7 @@ import {
 import PoolCard from "./components/PoolCard";
 import PoolCardDisabled from "./components/PoolCardDisabled";
 import { useTokenAllowance } from "../../hooks/useAllowance";
-import { SLEEP_SWAP_ADDRESSES, TOKEN_ADDRESSES } from "../../constants";
+import { SLEEP_SWAP_ADDRESSES, TOKENS } from "../../constants";
 import { useChain } from "react-moralis";
 
 const useStyles = makeStyles((theme) => ({
@@ -112,16 +112,6 @@ export default function Home() {
   const theme = useTheme();
 
   const { account } = useChain();
-
-  const allowance = useTokenAllowance(
-    TOKEN_ADDRESSES?.["USDT"]?.[42],
-    account,
-    SLEEP_SWAP_ADDRESSES?.[42]
-  );
-
-  useEffect(() => {
-    console.log("checking allowance ", allowance);
-  }, [allowance]);
 
   return (
     <Box>
