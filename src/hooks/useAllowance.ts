@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import BigNumber from "bignumber.js";
-import { SLEEP_SWAP_ADDRESSES } from "../constants";
+import { CHAIN, SLEEP_SWAP_ADDRESSES } from "../constants";
 import { useChain, useMoralis, useMoralisWeb3Api } from "react-moralis";
 
 import tokenAbi from "../contracts/abi/erc20.json";
@@ -19,7 +19,7 @@ export function useTokenAllowance(
     hash: null,
   });
 
-  const spender = SLEEP_SWAP_ADDRESSES?.[42];
+  const spender = SLEEP_SWAP_ADDRESSES?.[CHAIN];
   const confirmAllowance = useCallback(async () => {
     try {
       setTrxState({ status: 1, hash: null });
@@ -53,7 +53,7 @@ export function useTokenAllowance(
   const fetchTokenAllowance = async () => {
     //Get token allowace on ETH
     const options: any = {
-      chain: "kovan",
+      chain: CHAIN === 80001 ? "0x13881" : "kovan",
       owner_address: account,
       spender_address: spender,
       address: token,
@@ -66,7 +66,7 @@ export function useTokenAllowance(
 
       setAllowance(new BigNumber(_allowance?.allowance).gt(0) ? true : false);
     } catch (error) {
-      console.log("fetchTokenAllowance allowance error ", error);
+      console.log("fetchTokenAllowance allowance error ", { error, options });
     }
   };
 

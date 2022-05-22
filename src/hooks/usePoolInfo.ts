@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { SLEEP_SWAP_ADDRESSES } from "../constants";
+import { CHAIN, SLEEP_SWAP_ADDRESSES } from "../constants";
 import { useChain, useMoralis, useMoralisWeb3Api } from "react-moralis";
 
 import sleepAbi from "../contracts/abi/sleepSwap.json";
@@ -17,7 +17,7 @@ export function usePoolInfo(): [PoolInfo | undefined, boolean] {
   //Todo: replace this function with graph query when graph ready:
   const fetchPoolInfo = async () => {
     const readOptions: any = {
-      contractAddress: SLEEP_SWAP_ADDRESSES?.[42],
+      contractAddress: SLEEP_SWAP_ADDRESSES?.[CHAIN],
       functionName: "getPoolInfo",
       abi: sleepAbi,
     };
