@@ -1,19 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
-import {
-  Box,
-  Button,
-  Container,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import PoolCard from "./components/PoolCard";
-import PoolCardDisabled from "./components/PoolCardDisabled";
+import { Box, Typography, useTheme } from "@mui/material";
+
 import { useTokenAllowance } from "../../hooks/useAllowance";
 import { SLEEP_SWAP_ADDRESSES, TOKEN_ADDRESSES } from "../../constants";
 import { useChain } from "react-moralis";
@@ -107,7 +95,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Home() {
+export default function Activities() {
   const classes = useStyles();
   const theme = useTheme();
 
@@ -156,24 +144,6 @@ export default function Home() {
             />
           </div>
         </div>
-
-        <Container style={{ marginTop: 40 }}>
-          <div className="text-center"></div>
-          <h6 variant="h1" className={classes.poolText}>
-            Available Pools
-          </h6>
-          <Grid container display={"flex"} justifyContent="center">
-            <Grid item md={4}>
-              <PoolCard />
-            </Grid>
-            <Grid item md={4}>
-              <PoolCardDisabled />
-            </Grid>
-            <Grid item md={4}>
-              <PoolCardDisabled />
-            </Grid>
-          </Grid>
-        </Container>
       </Box>
     </Box>
   );

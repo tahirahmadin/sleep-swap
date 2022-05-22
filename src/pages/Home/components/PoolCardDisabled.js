@@ -89,6 +89,10 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       boxShadow: "0px 24px 33px -9px #0000005C",
     },
+    [theme.breakpoints.down("md")]: {
+      height: "100%",
+      width: "100%",
+    },
   },
   cardTitle: {
     fontWeight: 400,

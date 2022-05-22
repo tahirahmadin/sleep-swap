@@ -148,7 +148,42 @@ export default function ConnectButton() {
 
   const changeNetwork = async () => {
     enableWeb3();
-    switchNetwork("0x13881");
+    await window.ethereum
+      .request({
+        method: "wallet_addEthereumChain",
+        params: [
+          // {
+          //   chainId: "0x13881",
+          //   chainName: "Polygon Test Network",
+          //   nativeCurrency: {
+          //     name: "MATIC",
+          //     symbol: "MATICT",
+          //     decimals: 18,
+          //   },
+          //   rpcUrls: ["https://matic-mumbai.chainstacklabs.com/"],
+          //   blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
+          // },
+          {
+            chainId: "0x2A",
+            chainName: "Kovan Test Network",
+            nativeCurrency: {
+              name: "ETHEREUM",
+              symbol: "ETH",
+              decimals: 18,
+            },
+            rpcUrls: [" https://kovan.infura.io/v3/"],
+            blockExplorerUrls: ["https://kovan.etherscan.io"],
+          },
+        ],
+      })
+      .catch(async (err) => {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+
+          // params: [{ chainId: "0x13881" }], // chainId must be in hexadecimal numbers
+          params: [{ chainId: "0x2A" }], // chainId must be in hexadecimal numbers
+        });
+      });
   };
 
   const [balance, setBalance] = useState(0);
@@ -165,19 +200,33 @@ export default function ConnectButton() {
       chain: "kovan",
     });
 
-    let bal = Moralis.Units.FromWei(result.balance); //Web3.utils.fromWei(result.balance.toString(), "ether");
+    console.log(result.balance);
+    let bal = Moralis.Units.FromWei(result.balance);
     setBalance(parseFloat(bal).toFixed(3));
     return bal;
   };
 
-  //   if (chainId != "80001") {
-  //     return (
-  //       <div>
-  //         {console.log(chainId)}
-  //         <button className={classes.loginButton}>Change Network</button>
-  //       </div>
-  //     );
-  //   }
+  // if (chainId != "0x13881") {
+  //   return (
+  //     <div>
+  //       {console.log(chainId)}
+  //       <button className={classes.loginButton} onClick={changeNetwork}>
+  //         Change Network
+  //       </button>
+  //     </div>
+  //   );
+  // }
+  if (chainId != "0x2a") {
+    return (
+      <div>
+        {console.log(chainId)}
+        <button className={classes.loginButton} onClick={changeNetwork}>
+          Change Network
+        </button>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div>
@@ -231,12 +280,12 @@ export default function ConnectButton() {
               color: "#212121",
               height: "100%",
               fontWeight: 600,
-
               fontSize: 16,
               letterSpacing: "-0.02em",
               color: "#414141",
               textAlign: "center",
               lineHeight: 1.5,
+
               paddingRight: 10,
             }}
           >

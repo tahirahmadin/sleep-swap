@@ -11,6 +11,7 @@ import Footer from "./common/Footer";
 import { Provider } from "react-redux";
 import store from "./store";
 import { useMoralis } from "react-moralis";
+import Activities from "./pages/Activities/Activities";
 
 function App() {
   const { isWeb3Enabled, enableWeb3, isAuthenticated, isWeb3EnableLoading } =
@@ -31,6 +32,7 @@ function App() {
             <Appbar />
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/activities" element={<Activities />} />
             </Routes>
           </Router>
         </Fragment>

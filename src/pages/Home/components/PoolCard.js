@@ -10,6 +10,7 @@ import { useUserTrade } from "../../../hooks/useUserTrade";
 import { fromWei } from "../../../utils/helper";
 import { usePoolInfo } from "../../../hooks/usePoolInfo";
 import BigNumber from "bignumber.js";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -84,6 +85,11 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 10,
     "&:hover": {
       boxShadow: "0px 24px 33px -9px #0000005C",
+    },
+
+    [theme.breakpoints.down("md")]: {
+      height: "100%",
+      width: "100%",
     },
   },
   cardTitle: {
@@ -337,6 +343,23 @@ export default function PoolCard() {
                   : "Approve USDT"}
               </Button>
             )}
+            <Box display="flex" justifyContent="center" alignItems="center">
+              <Link to="activities">
+                <div
+                  style={{
+                    paddingTop: 10,
+                    color: "#027FFF",
+                    fontWeight: 400,
+                    fontSize: 13,
+                    textDecoration: "none",
+                    marginRight: 10,
+                    fontFamily: "poppins",
+                  }}
+                >
+                  view your activities
+                </div>
+              </Link>
+            </Box>
           </Box>
         </Box>
       </div>
