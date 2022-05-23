@@ -21,14 +21,12 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     uint256 tokenDecimals = 10**6; // usdt token decimals
     // polygon: 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
     // koven: 0xa36085F69e2889c224210F603D836748e7dC0088
-    address LINK = 0xa36085F69e2889c224210F603D836748e7dC0088;
+    // address LINK = 0xa36085F69e2889c224210F603D836748e7dC0088;
 
     AggregatorV3Interface internal matic_usd_price_feed;
     // AggregatorV3Interface internal link_matic_price_feed;
     // AggregatorV3Interface internal matic_usd_price_feed;
 
-    // uint256 public strategyPercent = 2;
-    // uint256 public buySellSteps = 5;
     address public manager;
 
     struct UserInfo {
@@ -72,6 +70,7 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
      */
 
     //mumbai:  0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada
+    // kovan: 0x9326BFA02ADD2366b30bacB125260Af641031331
     address internal maticUsdDataFeed =
         0x9326BFA02ADD2366b30bacB125260Af641031331;
 

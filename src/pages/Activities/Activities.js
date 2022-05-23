@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Box, Typography, useTheme } from "@mui/material";
 
-import { useTokenAllowance } from "../../hooks/useAllowance";
-import { SLEEP_SWAP_ADDRESSES, TOKEN_ADDRESSES } from "../../constants";
 import { useChain } from "react-moralis";
 import ActivityCard from "./components/ActivityCard";
 
@@ -98,16 +96,6 @@ export default function Activities() {
   const theme = useTheme();
 
   const { account } = useChain();
-
-  const allowance = useTokenAllowance(
-    TOKEN_ADDRESSES?.["USDT"]?.[42],
-    account,
-    SLEEP_SWAP_ADDRESSES?.[42]
-  );
-
-  useEffect(() => {
-    console.log("checking allowance ", allowance);
-  }, [allowance]);
 
   return (
     <Box>

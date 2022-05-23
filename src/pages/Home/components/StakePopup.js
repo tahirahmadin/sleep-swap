@@ -219,7 +219,6 @@ const StakePopup = ({
   stakePopup,
   setStakePopup,
   poolToken,
-  ethToken,
   userStaked,
   userTradeSettings,
   startTradeOrder,
