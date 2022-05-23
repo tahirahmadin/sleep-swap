@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundPosition: "center center,center center",
     backgroundRepeat: "no-repeat,no-repeat",
     backgroundSize: "cover,contain",
-    height: "88vh",
+    height: "93vh",
     width: "100%",
     paddingTop: "2%",
     [theme.breakpoints.down("md")]: {

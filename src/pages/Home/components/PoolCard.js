@@ -356,7 +356,7 @@ export default function PoolCard() {
                     fontFamily: "poppins",
                   }}
                 >
-                  view your activities
+                  View your activities
                 </div>
               </Link>
             </Box>

@@ -5,6 +5,7 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { useTokenAllowance } from "../../hooks/useAllowance";
 import { SLEEP_SWAP_ADDRESSES, TOKEN_ADDRESSES } from "../../constants";
 import { useChain } from "react-moralis";
+import ActivityCard from "./components/ActivityCard";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -14,17 +15,14 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover,contain",
     height: "88vh",
     width: "100%",
-    paddingTop: "2%",
+    paddingTop: "3%",
     [theme.breakpoints.down("md")]: {
       paddingTop: "10%",
-
-      paddingLeft: 15,
-      paddingRight: 15,
     },
   },
   mainHeading: {
     fontWeight: 600,
-    fontSize: 48,
+    fontSize: 28,
     letterSpacing: "0.02em",
     color: "#212121",
     textAlign: "center",
@@ -114,36 +112,54 @@ export default function Activities() {
   return (
     <Box>
       <Box className={classes.background}>
-        <h3 variant="h1" className={classes.mainHeading}>
-          Stake. Sleep. <span style={{ color: "#6227B9" }}> Repeat.</span>
+        <h3 className={classes.mainHeading}>
+          Sleepy<span style={{ color: "#6227B9" }}> activities</span>
         </h3>
-        <Typography variant="body2" className={classes.para}>
-          Experience first decentralized smart strategy trading interface{" "}
-        </Typography>
-        <div className="mt-3">
-          <Typography
-            variant="h6"
-            className={classes.para}
-            style={{ fontSize: 13 }}
-          >
-            Powered By
-          </Typography>
-        </div>
-        <div className="d-flex justify-content-center">
-          <div style={{ marginRight: 10 }}>
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Chainlink_Logo_Blue.svg/2560px-Chainlink_Logo_Blue.svg.png"
-              height="20px"
-            />
-          </div>
 
-          <div style={{ marginLeft: 10 }}>
+        <Box
+          display="flex"
+          flexDirection={"row"}
+          justifyContent="center"
+          alignItems="center"
+          mt={3}
+        >
+          <Box
+            style={{ minWidth: 600 }}
+            display="flex"
+            justifyContent="flex-start"
+            alignItems="center"
+          >
+            <span style={{ paddingRight: 10 }}> Pool Name:</span>{" "}
             <img
-              src="https://stakehound.com/wp-content/uploads/2021/04/Polygon-logo.png"
-              height="18px"
+              src="https://cdn3d.iconscout.com/3d/premium/thumb/chainlink-coin-4199896-3478982@0.png"
+              alt="Polygon"
+              height="16px"
+            />{" "}
+            <img
+              src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+              alt="USDT"
+              height="16px"
             />
-          </div>
-        </div>
+            <Typography
+              variant="body2"
+              className={classes.para}
+              textAlign="left"
+              fontWeight={600}
+              fontSize={12}
+              color="#919191"
+              ml={1}
+            >
+              MATIC/USDT
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box display={"flex"} flexDirection="column" alignItems="center">
+          <ActivityCard />
+          <ActivityCard />
+          <ActivityCard />
+          <ActivityCard />
+        </Box>
       </Box>
     </Box>
   );

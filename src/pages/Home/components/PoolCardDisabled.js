@@ -287,6 +287,21 @@ export default function PoolCardDisabled() {
               Coming Soon
             </Button>
           </Box>
+          <Box display="flex" justifyContent="center" alignItems="center">
+            <div
+              style={{
+                paddingTop: 10,
+                color: "#027FFF",
+                fontWeight: 400,
+                fontSize: 13,
+                textDecoration: "none",
+                marginRight: 10,
+                fontFamily: "poppins",
+              }}
+            >
+              View your activities
+            </div>
+          </Box>
         </Box>
       </div>
     </Box>
