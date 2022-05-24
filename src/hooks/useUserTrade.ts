@@ -139,6 +139,7 @@ export function useUserTrade(
         Moralis.executeFunction(readOptions1),
       ]);
 
+      console.log("order info ", orders);
       setTradeInfo({
         staked: info?._totalStaked?.toString(),
         tokenBalance: info?._tokenBalance?.toString(),

@@ -263,7 +263,11 @@ const StakePopup = ({
       console.log("Invalid grid or percent");
       return;
     }
-
+    // console.log("params ", {
+    //   amount: toWei(amount, poolToken.decimals),
+    //   grids,
+    //   percent,
+    // });
     startTradeOrder(
       toWei(amount, poolToken.decimals),
       parseInt(grids),

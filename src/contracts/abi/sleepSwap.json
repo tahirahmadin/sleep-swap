@@ -18,6 +18,12 @@
         "internalType": "uint256",
         "name": "ethAmount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenAmount",
+        "type": "uint256"
       }
     ],
     "name": "DepositReserve",
@@ -48,6 +54,49 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "orderType",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "ethPirce",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fromAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "toAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fee",
+        "type": "uint256"
+      }
+    ],
+    "name": "RunOrder",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "userAddress",
         "type": "address"
       },
@@ -56,22 +105,27 @@
         "internalType": "uint256",
         "name": "tokenAmount",
         "type": "uint256"
-      }
-    ],
-    "name": "StartYieldSwap",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
+      },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "Percentage",
+        "name": "gridSize",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "percent",
+        "type": "int256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "ethPrice",
         "type": "uint256"
       }
     ],
-    "name": "UpdateStrategy",
+    "name": "StartYieldSwap",
     "type": "event"
   },
   {
@@ -105,13 +159,19 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "",
+        "name": "user",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
         "name": "userUsdt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "ethPrice",
         "type": "uint256"
       }
     ],
@@ -300,6 +360,19 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalDeposits",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -516,7 +589,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_totalUsdt",
+        "name": "_totalDeposits",
         "type": "uint256"
       },
       {
@@ -600,6 +673,21 @@
       {
         "internalType": "uint256",
         "name": "_sellRuns",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_grids",
+        "type": "uint256"
+      },
+      {
+        "internalType": "int256",
+        "name": "_percent",
+        "type": "int256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_currenOrderPrice",
         "type": "uint256"
       }
     ],
