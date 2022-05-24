@@ -1,0 +1,39 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: YeildSwap
+    network: kovan
+    source:
+      address: "0xbb10bdb087d482F3CF04f2FEb627252CE580aea7"
+      abi: YeildSwap
+      startBlock: 31784804
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - DepositReserve
+        - OwnershipTransferred
+        - RunOrder
+        - StartYieldSwap
+        - WithdrawReserves
+        - WithdrawUserFunds
+      abis:
+        - name: YeildSwap
+          file: ./abis/YeildSwap.json
+      eventHandlers:
+        - event: DepositReserve(address,uint256,uint256)
+          handler: handleDepositReserve
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RunOrder(address,string,uint256,uint256,uint256,uint256)
+          handler: handleRunOrder
+        - event: StartYieldSwap(address,uint256,uint256,int256,uint256)
+          handler: handleStartYieldSwap
+        - event: WithdrawReserves(address,uint256,uint256)
+          handler: handleWithdrawReserves
+        - event: WithdrawUserFunds(address,uint256,uint256)
+          handler: handleWithdrawUserFunds
+      file: ./src/mapping.ts

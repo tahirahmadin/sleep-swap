@@ -1,0 +1,20 @@
+type PoolData @entity {
+  id: ID!
+  totalEth: BigInt
+  totalToken: BigInt
+  totalOrders: BigInt
+  ordersCompleted: BigInt
+  ordersActive: BigInt
+  averageGain: BigInt
+}
+
+type UserActivity @entity {
+  id: ID!
+  type: String! # buy/sell/deposit/withdraw
+  atPrice: BigInt! # eth price when activity runs
+  userAddress: Bytes! # address
+  tokenAmount: BigInt
+  ethAmount: BigInt
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
