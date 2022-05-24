@@ -1,11 +1,9 @@
 import { Token } from "../utils/interface";
 
 export const NetworkContextName = "NETWORK";
-export const supportedChains = [
-  1, 4, 1285, 1287, 97, 56, 137, 80001, 1666700000, 1666600000,
-];
+export const supportedChains = [1, 4, 42, 97, 56, 137, 80001];
 
-//
+//current chain id
 export const CHAIN: number = 42;
 
 export const NATIVE_TOKEN = {
@@ -17,7 +15,7 @@ export const ALLOWANCE_AMOUNT = "999999999";
 
 export const SLEEP_SWAP_ADDRESSES: { [index: number]: string } = {
   1: "",
-  42: "0xBDcE250Ae6ae354ef009c57cC7567FE3b7AEAaA0",
+  42: "0xbb10bdb087d482F3CF04f2FEb627252CE580aea7", // "0xBDcE250Ae6ae354ef009c57cC7567FE3b7AEAaA0",
   80001: "0xc112aE0E502f5c98a7cd78a6c26631Bc1e937029",
 };
 

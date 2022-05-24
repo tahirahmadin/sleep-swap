@@ -139,6 +139,7 @@ export function useUserTrade(
         Moralis.executeFunction(readOptions1),
       ]);
 
+      // console.log("order info ", orders);
       setTradeInfo({
         staked: info?._totalStaked?.toString(),
         tokenBalance: info?._tokenBalance?.toString(),
@@ -148,6 +149,8 @@ export function useUserTrade(
         earnings: "0",
         completedBuyOrders: orders?._buyRuns?.toString(),
         completedSellOrders: orders?._sellRuns?.toString(),
+        gridCount: orders?._grids?.toString(),
+        percentChange: orders?._percent?.toString(),
       });
 
       // todo: fetch this from blockchain

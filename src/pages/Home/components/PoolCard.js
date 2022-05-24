@@ -126,7 +126,8 @@ export default function PoolCard() {
     transactionState,
     resetTrxState,
   ] = useUserTrade(poolToken.address);
-  const [poolInfo, poolLoading] = usePoolInfo();
+
+  const [poolInfo, fetchPoolInfo, poolLoading] = usePoolInfo();
 
   const userTotalValueInPool = useMemo(() => {
     const totalEthUsd = new BigNumber(
@@ -150,14 +151,13 @@ export default function PoolCard() {
     if (!poolInfo) {
       return "0";
     }
-    const totalEthUsd = new BigNumber(
-      fromWei(poolInfo?.totalEthInPool, nativeToken.decimals)
-    )
-      .plus(fromWei(poolInfo?.totalFee, nativeToken.decimals))
-      .multipliedBy(fromWei(poolInfo?.ethPriceUsd, 8));
+    // const totalEthUsd = new BigNumber(
+    //   fromWei(poolInfo?.totalEthInPool, nativeToken.decimals)
+    // )
+    //   .plus(fromWei(poolInfo?.totalFee, nativeToken.decimals))
+    //   .multipliedBy(fromWei(poolInfo?.ethPriceUsd, 8));
 
-    return totalEthUsd
-      .plus(fromWei(poolInfo?.totalUsdtInPool, poolToken.decimals))
+    return new BigNumber(fromWei(poolInfo?.totalDeposits, poolToken.decimals))
       .toFixed(3)
       .toString();
   }, [poolInfo]);
@@ -165,6 +165,13 @@ export default function PoolCard() {
   const handleAllowance = useCallback(() => {
     confirmAllowance();
   }, [confirmAllowance]);
+
+  useEffect(() => {
+    if (!userStaked) {
+      return;
+    }
+    fetchPoolInfo();
+  }, [userStaked]);
 
   return (
     <Box>

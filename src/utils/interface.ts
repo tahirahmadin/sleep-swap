@@ -9,7 +9,7 @@ export interface Token {
 export interface PoolInfo {
   totalEthInPool: string; // total usdt deposits
   totalFee: string; // total eth reserve
-  totalUsdtInPool: string;
+  totalDeposits: string;
   totalOrders: string;
   averageGain: string | undefined;
   ethPriceUsd: string;
@@ -30,6 +30,8 @@ export interface UserStakedInfo {
   sellOrderAmount: string;
   completedBuyOrders: string;
   completedSellOrders: string;
+  gridCount: string;
+  percentChange: string;
 }
 
 export interface TransactionStatus {

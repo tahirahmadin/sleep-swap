@@ -25,27 +25,27 @@ function useBlock() {
     [chainId]
   );
 
-  useEffect(() => {
-    if (library && chainId && windowVisible) {
-      setState({ chainId });
+  // useEffect(() => {
+  //   if (library && chainId && windowVisible) {
+  //     setState({ chainId });
 
-      library
-        .getBlockNumber()
-        .then(onBlock)
-        .catch((error: any) => {
-          console.error(
-            `Failed to get block number for chainId ${chainId}`,
-            error
-          );
-        });
+  //     library
+  //       .getBlockNumber()
+  //       .then(onBlock)
+  //       .catch((error: any) => {
+  //         console.error(
+  //           `Failed to get block number for chainId ${chainId}`,
+  //           error
+  //         );
+  //       });
 
-      library.on("block", onBlock);
-      return () => {
-        library.removeListener("block", onBlock);
-      };
-    }
-    return undefined;
-  }, [chainId, library, onBlock, windowVisible]);
+  //     library.on("block", onBlock);
+  //     return () => {
+  //       library.removeListener("block", onBlock);
+  //     };
+  //   }
+  //   return undefined;
+  // }, [chainId, library, onBlock, windowVisible]);
 
   const debouncedBlock = useDebounce(state.block, 2000);
   return state.block ? debouncedBlock : undefined;

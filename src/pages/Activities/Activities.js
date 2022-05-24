@@ -4,6 +4,8 @@ import { Box, Typography, useTheme } from "@mui/material";
 
 import { useChain } from "react-moralis";
 import ActivityCard from "./components/ActivityCard";
+import { getUserActivities } from "../../apollo/queries";
+import { formatCurrency, fromWei } from "../../utils/helper";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -96,6 +98,22 @@ export default function Activities() {
   const theme = useTheme();
 
   const { account } = useChain();
+  const [userActivities, setActivities] = useState([]);
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    if (!account) {
+      return;
+    }
+
+    async function fetchData() {
+      const data = await getUserActivities(account, page);
+      console.log("data fetched ", data);
+      setActivities([...userActivities, ...data?.userActivities]);
+    }
+
+    fetchData();
+  }, [account, page]);
 
   return (
     <Box>
@@ -144,7 +162,20 @@ export default function Activities() {
         </Box>
 
         <Box display={"flex"} flexDirection="column" alignItems="center">
-          <ActivityCard
+          {userActivities &&
+            userActivities.map((item) => (
+              <ActivityCard
+                type={item?.type}
+                title={item?.type?.toUpperCase()}
+                amount={formatCurrency(fromWei(item?.tokenAmount, 6))}
+                price={formatCurrency(fromWei(item?.atPrice, 8))}
+                date={new Date(item?.timestamp * 1000)?.toLocaleString()}
+                media={
+                  "https://cdn3d.iconscout.com/3d/premium/thumb/wallet-4024965-3337585.png"
+                }
+              />
+            ))}
+          {/* <ActivityCard
             title={"Staked"}
             amount={"+ $100"}
             price={2050}
@@ -152,8 +183,8 @@ export default function Activities() {
             media={
               "https://cdn3d.iconscout.com/3d/premium/thumb/wallet-4024965-3337585.png"
             }
-          />
-          <ActivityCard
+          /> */}
+          {/* <ActivityCard
             title={"Buy Order"}
             amount={"$25"}
             price={1980}
@@ -188,7 +219,7 @@ export default function Activities() {
             media={
               "https://cdn3d.iconscout.com/3d/premium/thumb/money-bag-5191982-4334772.png"
             }
-          />
+          /> */}
         </Box>
       </Box>
     </Box>

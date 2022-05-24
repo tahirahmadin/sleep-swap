@@ -5,9 +5,9 @@ import { useChain, useMoralis, useMoralisWeb3Api } from "react-moralis";
 import sleepAbi from "../contracts/abi/sleepSwap.json";
 import { PoolInfo } from "../utils/interface";
 
-export function usePoolInfo(): [PoolInfo | undefined, boolean] {
+export function usePoolInfo(): [PoolInfo | undefined, () => void, boolean] {
   // const contract = useTokenContract(token?.address, false);
-  const { account } = useChain();
+  const { account, chainId } = useChain();
   const [poolInfo, setPoolInfo] = useState<PoolInfo | undefined>(undefined); // fetch user trade settings from blockchain and update
 
   const { Moralis } = useMoralis();
@@ -25,10 +25,12 @@ export function usePoolInfo(): [PoolInfo | undefined, boolean] {
     try {
       // Read new value
       const info: any = await Moralis.executeFunction(readOptions);
+
+      // console.log("fetched pool info ", { info });
       setPoolInfo({
         totalEthInPool: info?._totalEthReserve?.toString(),
         totalFee: info?._totalFee?.toString(),
-        totalUsdtInPool: info?._totalUsdt?.toString(),
+        totalDeposits: info?._totalDeposits?.toString(),
         totalOrders: info?._totalOrders?.toString(),
         ethPriceUsd: info?._ethPrice?.toString(),
         averageGain: "0",
@@ -46,5 +48,8 @@ export function usePoolInfo(): [PoolInfo | undefined, boolean] {
     fetchPoolInfo();
   }, [account]);
 
-  return useMemo(() => [poolInfo, poolLoading], [poolInfo, poolLoading]);
+  return useMemo(
+    () => [poolInfo, fetchPoolInfo, poolLoading],
+    [poolInfo, poolLoading]
+  );
 }
