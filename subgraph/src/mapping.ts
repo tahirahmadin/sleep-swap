@@ -13,12 +13,12 @@ import { UserActivity, PoolData } from "../generated/schema";
 export function handleDepositReserve(event: DepositReserve): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let entity = PoolData.load(event.transaction.from.toHex());
+  let entity = PoolData.load(event.transaction.hash.toHex());
 
   // Entities only exist after they have been saved to the store;
   // `null` checks allow to create entities on demand
   if (entity == null) {
-    entity = new PoolData(event.transaction.from.toHex());
+    entity = new PoolData(event.transaction.hash.toHex());
 
     // Entity fields can be set using simple assignments
     // entity.count = PoolData.fromI32(0);
@@ -80,12 +80,12 @@ export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
 export function handleRunOrder(event: RunOrder): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let userActivity = UserActivity.load(event.transaction.from.toHex());
+  let userActivity = UserActivity.load(event.transaction.hash.toHex());
 
   // Entities only exist after they have been saved to the store;
   // `null` checks allow to create entities on demand
   if (userActivity == null) {
-    userActivity = new UserActivity(event.transaction.from.toHex());
+    userActivity = new UserActivity(event.transaction.hash.toHex());
   }
 
   // Entity fields can be set based on event parameters
@@ -110,12 +110,12 @@ export function handleRunOrder(event: RunOrder): void {
 export function handleStartYieldSwap(event: StartYieldSwap): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let userActivity = UserActivity.load(event.transaction.from.toHex());
+  let userActivity = UserActivity.load(event.transaction.hash.toHex());
 
   // Entities only exist after they have been saved to the store;
   // `null` checks allow to create entities on demand
   if (userActivity == null) {
-    userActivity = new UserActivity(event.transaction.from.toHex());
+    userActivity = new UserActivity(event.transaction.hash.toHex());
   }
 
   // Entity fields can be set based on event parameters
@@ -136,12 +136,12 @@ export function handleWithdrawReserves(event: WithdrawReserves): void {}
 export function handleWithdrawUserFunds(event: WithdrawUserFunds): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let userActivity = UserActivity.load(event.transaction.from.toHex());
+  let userActivity = UserActivity.load(event.transaction.hash.toHex());
 
   // Entities only exist after they have been saved to the store;
   // `null` checks allow to create entities on demand
   if (userActivity == null) {
-    userActivity = new UserActivity(event.transaction.from.toHex());
+    userActivity = new UserActivity(event.transaction.hash.toHex());
   }
 
   // Entity fields can be set based on event parameters

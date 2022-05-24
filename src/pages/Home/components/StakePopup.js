@@ -877,8 +877,22 @@ const StakePopup = ({
                         }}
                       >
                         <CircularProgressbar
-                          value={50}
-                          text={`${50}%`}
+                          value={
+                            userStaked &&
+                            parseInt(
+                              (userStaked?.completedBuyOrders /
+                                userStaked?.gridCount) *
+                                100
+                            )
+                          }
+                          text={`${
+                            userStaked &&
+                            parseInt(
+                              (userStaked?.completedBuyOrders /
+                                userStaked?.gridCount) *
+                                100
+                            )
+                          }%`}
                           styles={buildStyles({
                             pathColor: `rgba(106, 85, 234, 1)`,
                             textColor: "#212121",
@@ -906,8 +920,16 @@ const StakePopup = ({
                         }}
                       >
                         <CircularProgressbar
-                          value={25}
-                          text={`${25}%`}
+                          value={parseInt(
+                            (userStaked?.completedSellOrders /
+                              userStaked?.gridCount) *
+                              100
+                          )}
+                          text={`${parseInt(
+                            (userStaked?.completedSellOrders /
+                              userStaked?.gridCount) *
+                              100
+                          )}%`}
                           styles={buildStyles({
                             pathColor: `rgba(106, 85, 234, 1)`,
                             textColor: "#212121",

@@ -30,6 +30,8 @@ export interface UserStakedInfo {
   sellOrderAmount: string;
   completedBuyOrders: string;
   completedSellOrders: string;
+  gridCount: string;
+  percentChange: string;
 }
 
 export interface TransactionStatus {
