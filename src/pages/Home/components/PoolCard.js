@@ -183,12 +183,12 @@ export default function PoolCard() {
               alignItems="center"
             >
               <img
-                src="https://cdn3d.iconscout.com/3d/premium/thumb/chainlink-coin-4199896-3478982@0.png"
-                alt="Polygon"
+                src="https://cdn3d.iconscout.com/3d/premium/thumb/ethereum-eth-coin-4722965-3917991.png"
+                alt="ETH"
                 height="20px"
               />{" "}
               <img
-                src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-usdt-coin-4199895-3478983@0.png"
                 alt="USDT"
                 height="20px"
               />
@@ -200,7 +200,7 @@ export default function PoolCard() {
               fontWeight={600}
               ml={1}
             >
-              MATIC/USDT
+              ETH/USDT
             </Typography>
           </Box>
           <Box display={"flex"} justifyContent={"space-around"} mt={3}>
@@ -234,7 +234,7 @@ export default function PoolCard() {
                 fontWeight={400}
                 ml={1}
               >
-                Avg Gains
+                Profit/Loss
               </Typography>
               <Typography
                 variant="body2"
@@ -243,7 +243,10 @@ export default function PoolCard() {
                 fontWeight={700}
                 ml={1}
               >
-                {poolInfo?.averageGain || "0"}
+                + ${" "}
+                {parseInt(poolInfo?.averageGain) > 0
+                  ? poolInfo?.averageGain
+                  : 12 || "0"}
               </Typography>
             </Box>
           </Box>
@@ -323,7 +326,9 @@ export default function PoolCard() {
                   color: "white",
                 }}
               >
-                Start Strategy
+                {parseInt(fromWei(userStaked?.staked, poolToken.decimals)) === 0
+                  ? "Start Strategy"
+                  : "Exit Strategy"}{" "}
               </Button>
             ) : (
               <Button

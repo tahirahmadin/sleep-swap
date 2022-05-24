@@ -120,50 +120,36 @@ const Appbar = ({ requestChalleng }) => {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    marginRight: "2rem",
-                    color: "black",
-                    textDecoration: "none",
-                  }}
-                >
-                  <img
-                    src="https://cdn3d.iconscout.com/3d/free/thumb/squigly-globe-3494833-2926648@0.png"
-                    alt="SleepSwap"
-                    className={classes.logo}
-                  />
+                <Link to="/">
                   <div
                     style={{
-                      paddingLeft: 2,
+                      display: "flex",
+                      justifyContent: "flex-start",
+                      alignItems: "center",
+                      marginRight: "2rem",
                       color: "black",
-                      fontWeight: 700,
-                      fontSize: 20,
                       textDecoration: "none",
                     }}
                   >
-                    Sleep Swap
-                  </div>
-                </div>
-                <Box>
-                  {/* <Box display="flex" justifyContent="flex-start">
-                  <Link to="/" style={{ textDecoration: "none" }}>
-                    {" "}
-                    <Typography
-                      variant="h6"
-                      color="textSecondary"
-                      className={classes.linkItems}
+                    <img
+                      src="https://cdn3d.iconscout.com/3d/free/thumb/squigly-globe-3494833-2926648@0.png"
+                      alt="SleepSwap"
+                      className={classes.logo}
+                    />
+                    <div
                       style={{
+                        paddingLeft: 2,
                         color: "black",
+                        fontWeight: 700,
+                        fontSize: 20,
+                        textDecoration: "none",
                       }}
                     >
-                      Home
-                    </Typography>
-                  </Link>
-                </Box> */}
-                </Box>
+                      Sleep Swap
+                    </div>
+                  </div>
+                </Link>
+                <Box></Box>
               </Box>
 
               <Box display="flex" justifyContent="flex-end" alignItems="center">

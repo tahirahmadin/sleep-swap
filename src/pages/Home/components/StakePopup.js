@@ -18,6 +18,8 @@ import TxPopup from "../../../common/TxPopup";
 import { formatCurrency, fromWei, toWei } from "../../../utils/helper";
 import BigNumber from "bignumber.js";
 import { useTokenBalance } from "../../../hooks/useBalance";
+import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -660,12 +662,12 @@ const StakePopup = ({
                         alignItems="center"
                       >
                         <img
-                          src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
-                          alt="Polygon"
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/ethereum-eth-coin-4722965-3917991.png"
+                          alt="ETH"
                           height="20px"
                         />{" "}
                         <img
-                          src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-usdt-coin-4199895-3478983@0.png"
                           alt="USDT"
                           height="20px"
                         />
@@ -851,67 +853,82 @@ const StakePopup = ({
                       </Typography>
                     </Box>
                   </Box>
+                  {/* buy {userStaked?.completedBuyOrders} - sell{" "}
+                      {userStaked?.completedSellOrders} */}
+                  <Box display={"flex"} justifyContent="space-around">
+                    <Box
+                      style={{
+                        width: 170,
+                        display: "flex",
+                        justifyContent: "center",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 70,
+                          height: 70,
+                          padding: 10,
+                        }}
+                      >
+                        <CircularProgressbar
+                          value={50}
+                          text={`${50}%`}
+                          styles={buildStyles({
+                            pathColor: `rgba(106, 85, 234, 1)`,
+                            textColor: "#212121",
+                          })}
+                        />
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 500 }}>
+                        Buy Order Executed
+                      </div>
+                    </Box>
+                    <Box
+                      style={{
+                        width: 170,
+                        display: "flex",
+                        justifyContent: "center",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 70,
+                          height: 70,
+                          padding: 10,
+                        }}
+                      >
+                        <CircularProgressbar
+                          value={25}
+                          text={`${25}%`}
+                          styles={buildStyles({
+                            pathColor: `rgba(106, 85, 234, 1)`,
+                            textColor: "#212121",
+                          })}
+                        />
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 500 }}>
+                        Sell Order Executed
+                      </div>
+                    </Box>
+                  </Box>
                   <div className="d-flex justify-content-center mt-3">
                     <Typography
                       variant="h6"
                       className={classes.para}
                       style={{ width: "80%" }}
                       textAlign="center"
-                      fontSize={14}
+                      fontSize={13}
                       fontWeight={400}
                     >
                       Withdrawl of funds from the pool will terminate the
-                      stratedy and you will recieve all your available funds +
-                      profit/loss. buy {userStaked?.completedBuyOrders} - sell{" "}
-                      {userStaked?.completedSellOrders}
+                      strategy and you will recieve all your available funds +
+                      profit/loss.
                     </Typography>
                   </div>
-                  {/* <Box display={"flex"} justifyContent="space-around" mt={2}>
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        textAlign={"center"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={14}
-                        color={"#454545"}
-                      >
-                        <strong>Completed Buy Orders</strong>
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        textAlign={"center"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
-                      >
-                        {userStaked?.completedBuyOrders || 0}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        textAlign={"center"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={14}
-                        color={"#454545"}
-                      >
-                        <strong>Completed Sell Orders</strong>
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        textAlign={"center"}
-                        className={classes.para}
-                        fontWeight={500}
-                        fontSize={12}
-                        color={"#757575"}
-                      >
-                        {userStaked?.completedSellOrders || 0}
-                      </Typography>
-                    </Box>
-                  </Box> */}
 
                   <div className="text-center">
                     <button

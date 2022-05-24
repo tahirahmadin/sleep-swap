@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundPosition: "center center,center center",
     backgroundRepeat: "no-repeat,no-repeat",
     backgroundSize: "cover,contain",
-    height: "88vh",
+    minHeight: "88vh",
     width: "100%",
     paddingTop: "3%",
     [theme.breakpoints.down("md")]: {
@@ -110,6 +110,7 @@ export default function Activities() {
           justifyContent="center"
           alignItems="center"
           mt={3}
+          mb={3}
         >
           <Box
             style={{ minWidth: 600 }}
@@ -119,8 +120,8 @@ export default function Activities() {
           >
             <span style={{ paddingRight: 10 }}> Pool Name:</span>{" "}
             <img
-              src="https://cdn3d.iconscout.com/3d/premium/thumb/chainlink-coin-4199896-3478982@0.png"
-              alt="Polygon"
+              src="https://cdn3d.iconscout.com/3d/premium/thumb/ethereum-eth-coin-4722965-3917991.png"
+              alt="ETH"
               height="16px"
             />{" "}
             <img
@@ -137,16 +138,57 @@ export default function Activities() {
               color="#919191"
               ml={1}
             >
-              MATIC/USDT
+              ETH/USDT
             </Typography>
           </Box>
         </Box>
 
         <Box display={"flex"} flexDirection="column" alignItems="center">
-          <ActivityCard />
-          <ActivityCard />
-          <ActivityCard />
-          <ActivityCard />
+          <ActivityCard
+            title={"Staked"}
+            amount={"+ $100"}
+            price={2050}
+            date={"23 May,2022 11:30PM"}
+            media={
+              "https://cdn3d.iconscout.com/3d/premium/thumb/wallet-4024965-3337585.png"
+            }
+          />
+          <ActivityCard
+            title={"Buy Order"}
+            amount={"$25"}
+            price={1980}
+            date={"23 May,2022 11:30PM"}
+            media={
+              "https://cdn3d.iconscout.com/3d/premium/thumb/income-5012983-4171838.png"
+            }
+          />
+          <ActivityCard
+            title={"Buy Order"}
+            amount={"$25"}
+            price={1950}
+            date={"23 May,2022 11:30PM"}
+            media={
+              "https://cdn3d.iconscout.com/3d/premium/thumb/income-5012983-4171838.png"
+            }
+          />
+          <ActivityCard
+            title={"Sell Order"}
+            amount={"- $29"}
+            price={2060}
+            date={"23 May,2022 11:30PM"}
+            media={
+              "https://cdn3d.iconscout.com/3d/premium/thumb/money-back-guarantee-3980375-3297228.png"
+            }
+          />
+          <ActivityCard
+            title={"Unstaked"}
+            amount={"$100 + $4"}
+            price={2080}
+            date={"23 May,2022 11:30PM"}
+            media={
+              "https://cdn3d.iconscout.com/3d/premium/thumb/money-bag-5191982-4334772.png"
+            }
+          />
         </Box>
       </Box>
     </Box>

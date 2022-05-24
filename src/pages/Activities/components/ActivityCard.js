@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ActivityCard() {
+export default function ActivityCard({ title, date, amount, media, price }) {
   const classes = useStyles();
   const theme = useTheme();
 
@@ -86,20 +86,39 @@ export default function ActivityCard() {
             justifyContent={"space-between"}
             alignItems="center"
           >
-            <Typography
-              variant="h6"
-              className={classes.para}
-              textAlign="center"
-              fontSize={20}
-              fontWeight={600}
+            <Box
+              display={"flex"}
+              justifyContent={"flex-start"}
+              alignItems="center"
             >
-              <img
-                src="https://cdn3d.iconscout.com/3d/premium/thumb/salary-4851461-4042252.png"
-                alt="Polygon"
-                height="22px"
-              />{" "}
-              Staked
-            </Typography>
+              <Box>
+                <img src={media} alt="Polygon" height="22px" />
+              </Box>
+              <Box px={1}>
+                <Typography
+                  variant="h6"
+                  className={classes.para}
+                  textAlign="left"
+                  fontSize={20}
+                  fontWeight={600}
+                >
+                  {title}
+                </Typography>
+                {price !== 0 && (
+                  <Typography
+                    variant="body2"
+                    className={classes.para}
+                    textAlign="left"
+                    fontWeight={500}
+                    fontSize={12}
+                    color="#919191"
+                  >
+                    Order price: ${price}/ETH
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
             <Box
               display={"flex"}
               flexDirection="column"
@@ -112,7 +131,7 @@ export default function ActivityCard() {
                 fontSize={24}
                 fontWeight={600}
               >
-                + $213
+                {amount}
               </Typography>
               <Typography
                 variant="body2"
@@ -122,7 +141,7 @@ export default function ActivityCard() {
                 fontSize={12}
                 color="#919191"
               >
-                21 May, 2022 08:21 AM
+                {date}
               </Typography>
             </Box>
           </Box>

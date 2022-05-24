@@ -196,7 +196,7 @@ export default function PoolCardDisabled() {
                 fontWeight={400}
                 ml={1}
               >
-                Avg Gains
+                Profit/Loss
               </Typography>
               <Typography
                 variant="body2"

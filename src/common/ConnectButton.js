@@ -188,9 +188,10 @@ export default function ConnectButton() {
 
   const [balance, setBalance] = useState(0);
 
-  useEffect(() => {
+  useEffect(async () => {
     if (isInitialized) {
-      fetchBalance();
+      let balance = await fetchBalance();
+      setBalance(balance);
     }
   }, [isInitialized]);
 
@@ -202,8 +203,9 @@ export default function ConnectButton() {
 
     console.log(result.balance);
     let bal = Moralis.Units.FromWei(result.balance);
+    let flooredBal = parseFloat(bal).toFixed(3);
     setBalance(parseFloat(bal).toFixed(3));
-    return bal;
+    return flooredBal;
   };
 
   // if (chainId != "0x13881") {
@@ -216,7 +218,7 @@ export default function ConnectButton() {
   //     </div>
   //   );
   // }
-  if (chainId != "0x2a") {
+  if (chainId != null && chainId !== "0x2a") {
     return (
       <div>
         {console.log(chainId)}
@@ -289,7 +291,7 @@ export default function ConnectButton() {
               paddingRight: 10,
             }}
           >
-            {balance} MATIC
+            {balance} ETH
           </span>{" "}
           <span className={classes.connectedAddress}>
             {userAddress.slice(0, 4)}...{userAddress.slice(-4)}

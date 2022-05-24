@@ -270,7 +270,7 @@ const TxPopup = ({ txCase, hash, resetPopup }) => {
                 fontWeight={600}
                 fontSize={22}
               >
-                Transaction Submit
+                Transaction Submitted
               </Typography>
               <Typography
                 variant="body2"
