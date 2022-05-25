@@ -263,16 +263,16 @@ const StakePopup = ({
       console.log("Invalid grid or percent");
       return;
     }
-    console.log("params ", {
-      amount: toWei(amount, poolToken.decimals),
-      grids: grids / 2,
-      percent,
-    });
-    // startTradeOrder(
-    //   toWei(amount, poolToken.decimals),
-    //   parseInt(grids),
-    //   parseInt(percent)
-    // );
+    // console.log("params ", {
+    //   amount: toWei(amount, poolToken.decimals),
+    //   grids: grids / 2,
+    //   percent,
+    // });
+    startTradeOrder(
+      toWei(amount, poolToken.decimals),
+      parseInt(grids),
+      parseInt(percent)
+    );
   }, [amount, startTradeOrder, grids, percent]);
 
   const handleWithdraw = useCallback(() => {
