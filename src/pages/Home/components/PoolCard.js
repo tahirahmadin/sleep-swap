@@ -140,6 +140,27 @@ export default function PoolCard() {
       .toString();
   }, [userStaked, poolInfo]);
 
+  const userTotalEthInPool = useMemo(() => {
+    console.log(userStaked?.tokenBalance);
+    console.log(userStaked?.usdtBalance);
+    const totalEthUsd = new BigNumber(
+      fromWei(userStaked?.tokenBalance, nativeToken.decimals)
+    );
+
+    return totalEthUsd.toFixed(3).toString();
+  }, [userStaked, poolInfo]);
+
+  const userTotalUSDTInPool = useMemo(() => {
+    const totalEthUsd = new BigNumber(
+      fromWei(userStaked?.usdtBalance, nativeToken.decimals)
+    ).multipliedBy(fromWei(poolInfo?.ethPriceUsd, 8));
+
+    return totalEthUsd
+      .plus(fromWei(userStaked?.usdtBalance, poolToken?.decimals))
+      .toFixed(0)
+      .toString();
+  }, [userStaked, poolInfo]);
+
   const totalEarnings = useMemo(() => {
     return new BigNumber(userTotalValueInPool)
       .minus(fromWei(userStaked?.staked, poolToken?.decimals))
@@ -388,6 +409,8 @@ export default function PoolCard() {
         resetTrxState={resetTrxState}
         userTotalValueInPool={userTotalValueInPool}
         totalEarnings={totalEarnings}
+        userTotalUSDTInPool={userTotalUSDTInPool}
+        userTotalEthInPool={userTotalEthInPool}
       />
     </Box>
   );

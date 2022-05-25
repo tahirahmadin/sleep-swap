@@ -229,6 +229,8 @@ const StakePopup = ({
   resetTrxState,
   userTotalValueInPool,
   totalEarnings,
+  userTotalEthInPool,
+  userTotalUSDTInPool,
 }) => {
   const classes = useStyles();
 
@@ -827,34 +829,54 @@ const StakePopup = ({
                         />
                         Amount in pool
                       </Typography>
-                      <Typography
-                        variant="body2"
-                        className={classes.para}
-                        textAlign="center"
-                        fontWeight={700}
-                        fontSize={22}
-                        color="#333333"
-                        ml={1}
-                        display="flex"
-                        alignItems={"center"}
+                      <Box
+                        display={"flex"}
+                        alignItems="flex-end"
+                        flexDirection={"column"}
                       >
-                        {userTotalValueInPool}
-                        <span
-                          style={{
-                            paddingLeft: 10,
-                            fontSize: 14,
-                            fontWeight: 600,
-                            color: "#454545",
-                          }}
+                        <Typography
+                          variant="body2"
+                          className={classes.para}
+                          textAlign="center"
+                          fontWeight={700}
+                          fontSize={22}
+                          color="#333333"
+                          ml={1}
+                          display="flex"
+                          alignItems={"center"}
                         >
-                          <img
-                            src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
-                            alt="USDT"
-                            height="20px"
-                          />{" "}
+                          {userTotalValueInPool}
+                          <span
+                            style={{
+                              paddingLeft: 10,
+                              fontSize: 14,
+                              fontWeight: 600,
+                              color: "#454545",
+                            }}
+                          >
+                            <img
+                              src="https://cdn3d.iconscout.com/3d/premium/thumb/tether-4924313-4102064.png"
+                              alt="USDT"
+                              height="20px"
+                            />{" "}
+                            USDT
+                          </span>
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          className={classes.para}
+                          textAlign="center"
+                          fontWeight={600}
+                          fontSize={11}
+                          color="#919191"
+                          ml={1}
+                          display="flex"
+                          alignItems={"center"}
+                        >
+                          = {userTotalEthInPool} ETH + {userTotalUSDTInPool}{" "}
                           USDT
-                        </span>
-                      </Typography>
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
                   {/* buy {userStaked?.completedBuyOrders} - sell{" "}
