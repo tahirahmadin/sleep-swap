@@ -270,7 +270,7 @@ const StakePopup = ({
     // });
     startTradeOrder(
       toWei(amount, poolToken.decimals),
-      parseInt(grids),
+      parseInt(grids / 2),
       parseInt(percent)
     );
   }, [amount, startTradeOrder, grids, percent]);
