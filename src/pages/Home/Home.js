@@ -17,6 +17,8 @@ import PoolCardDisabled from "./components/PoolCardDisabled";
 import { useTokenAllowance } from "../../hooks/useAllowance";
 import { SLEEP_SWAP_ADDRESSES, TOKENS } from "../../constants";
 import { useChain } from "react-moralis";
+import PoolCardDisabledMatic from "./components/PoolCardDisabled";
+import PoolCardDisabledLink from "./components/PoolDisabledCard";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -157,10 +159,10 @@ export default function Home() {
               <PoolCard />
             </Grid>
             <Grid item md={4}>
-              <PoolCardDisabled />
+              <PoolCardDisabledMatic />
             </Grid>
             <Grid item md={4}>
-              <PoolCardDisabled />
+              <PoolCardDisabledLink />
             </Grid>
           </Grid>
         </Container>

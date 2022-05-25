@@ -397,7 +397,7 @@ const StakePopup = ({
                         alignItems="center"
                       >
                         <img
-                          src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
+                          src="https://cdn3d.iconscout.com/3d/premium/thumb/ethereum-eth-coin-4722965-3917991.png"
                           alt="Polygon"
                           height="20px"
                         />{" "}
@@ -414,7 +414,7 @@ const StakePopup = ({
                         fontWeight={600}
                         ml={1}
                       >
-                        MATIC/USDT
+                        ETH/USDT
                       </Typography>
                     </Box>
                   </div>
@@ -683,7 +683,7 @@ const StakePopup = ({
                         fontWeight={600}
                         ml={1}
                       >
-                        MATIC/USDT
+                        ETH/USDT
                       </Typography>
                     </Box>
                   </div>

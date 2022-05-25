@@ -72,14 +72,13 @@ const useStyles = makeStyles((theme) => ({
     cursor: "pointer",
   },
   filterCard: {
-    marginTop: 20,
     marginBottom: 20,
     height: "100%",
-    width: "80%",
+    width: 600,
     border: "1px solid #eeeeee",
-
-    paddingTop: 30,
-
+    padding: 15,
+    fontWeight: 400,
+    fontFamily: "poppins",
     backgroundColor: "#FFFFFF",
     boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
     borderRadius: 10,
@@ -162,6 +161,9 @@ export default function Activities() {
         </Box>
 
         <Box display={"flex"} flexDirection="column" alignItems="center">
+          {userActivities.length === 0 && (
+            <div className={classes.filterCard}>No activities found</div>
+          )}
           {userActivities &&
             userActivities.map((item) => (
               <ActivityCard

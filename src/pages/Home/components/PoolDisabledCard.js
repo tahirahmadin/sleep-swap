@@ -103,7 +103,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function PoolCardDisabledMatic() {
+export default function PoolCardDisabledLink() {
   const classes = useStyles();
   const theme = useTheme();
 
@@ -145,8 +145,8 @@ export default function PoolCardDisabledMatic() {
               alignItems="center"
             >
               <img
-                src="https://cdn3d.iconscout.com/3d/premium/thumb/chainlink-coin-4199896-3478982@0.png"
-                alt="Link"
+                src="https://cdn3d.iconscout.com/3d/premium/thumb/polygon-4924309-4102060.png"
+                alt="Polygon"
                 height="20px"
               />{" "}
               <img
@@ -162,7 +162,7 @@ export default function PoolCardDisabledMatic() {
               fontWeight={600}
               ml={1}
             >
-              LINK/USDT
+              MATIC/USDT
             </Typography>
           </Box>
           <Box display={"flex"} justifyContent={"space-around"} mt={3}>
