@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract YeildSwap is KeeperCompatibleInterface, Ownable {
+contract SleepSwap is KeeperCompatibleInterface, Ownable {
     using SafeCast for int256;
     using SafeMath for uint256;
 
@@ -115,12 +115,22 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         uint256 fee
     );
 
-    function getPriceUsd() public view returns (uint256) {
-        (, int256 priceUsd, , , ) = matic_usd_price_feed.latestRoundData();
+    // function getPriceUsd() public view returns (uint256) {
+    //     (, int256 priceUsd, , , ) = matic_usd_price_feed.latestRoundData();
 
-        // (, int256 maticUsdPrice, , , ) = matic_usd_price_feed.latestRoundData();
-        // return  linkMaticPrice.mul(maticUsdPrice).div(priceFeedDecimals); // use this for polygon chain
-        return priceUsd.toUint256();
+    //     // (, int256 maticUsdPrice, , , ) = matic_usd_price_feed.latestRoundData();
+    //     // return  linkMaticPrice.mul(maticUsdPrice).div(priceFeedDecimals); // use this for polygon chain
+    //     return priceUsd.toUint256();
+    // }
+    uint256 public testEthPriceUsd = 200000000000;
+
+    // mocking eth price feed for testing
+    function getPriceUsd() public view returns (uint256) {
+        return testEthPriceUsd;
+    }
+
+    function setPriceUsd(uint256 _price) public payable {
+        testEthPriceUsd = _price;
     }
 
     // get usdt equivalent eth amount based on current eth price
@@ -423,8 +433,15 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
     }
 
     // Function to withdraw reserves from pool
-    function withdrawReserve(address _token) public onlyOwner {
-        require(totalEthInPool > 0, "resevr in pool must be greater than 0.");
+    function withdrawReserve(address _token)
+        public
+        onlyOwner
+        returns (uint256 _eth, uint256 _usdt)
+    {
+        require(
+            totalEthInPool > 0 || totalUsdtInPool > 0,
+            "ETH or USDT reserve in pool must be greater than 0."
+        );
 
         // uint256 ethBalance = address(this).balance;
         address payable to = payable(msg.sender);
@@ -444,6 +461,8 @@ contract YeildSwap is KeeperCompatibleInterface, Ownable {
         totalFee = 0;
 
         emit WithdrawReserves(msg.sender, _totalReserveEth, _totalFeeEth);
+        (_eth, _usdt) = (totalEthInPool, totalUsdtInPool);
+        return (_eth, _usdt);
     }
 
     // convert user funds into usdt before withdraw
