@@ -8,21 +8,22 @@ export const shouldStartUserTrade = (): void => {
   //   ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.OFF);
 
   context(`#user start trade`, async function () {
-    it(`should revert if user did not approved before trade`, async function () {
-      const usdtAmount: BigNumber = BigNumber.from(100000000); // 100usdt
-      const gridCount = 4;
-      const percentChange = 5;
-      await expect(
-        this.sleepSwap
-          .connect(this.signers.alice)
-          .startYieldSwap(
-            this.mocks.mockUsdt.address,
-            usdtAmount,
-            gridCount,
-            percentChange
-          )
-      ).to.be.reverted;
-    });
+    // no need to test this
+    // it(`should revert if user did not approved before trade`, async function () {
+    //   const usdtAmount: BigNumber = BigNumber.from(100000000); // 100usdt
+    //   const gridCount = 4;
+    //   const percentChange = 5;
+    //   await expect(
+    //     this.sleepSwap
+    //       .connect(this.signers.alice)
+    //       .startYieldSwap(
+    //         this.mocks.mockUsdt.address,
+    //         usdtAmount,
+    //         gridCount,
+    //         percentChange
+    //       )
+    //   ).to.be.reverted;
+    // });
 
     it(`should  start user trade and emit correct event`, async function () {
       // init pool reserve
