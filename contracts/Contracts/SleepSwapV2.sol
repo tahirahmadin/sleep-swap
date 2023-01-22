@@ -59,7 +59,8 @@ contract SleepSwapV2 {
     mapping(address => Position) public userPositions;
 
     // list of all orders  accesible through indices
-    Order[] public allOrders;
+    Order[] public allBuyOrders;
+    Order[] public allSellOrders;
 
     // mapping of position index to list of order indices
     mapping(uint256 => uint256[]) positionOrders;
@@ -110,7 +111,7 @@ contract SleepSwapV2 {
         uint256 _price,
         uint256 _quantity,
         address _token
-    ) public {
+    ) internal {
         Order memory newOrder = Order({
             user: _user,
             price: _price,
@@ -122,6 +123,9 @@ contract SleepSwapV2 {
         buyOrderBook.orders.push(newOrder);
         buyOrderBook.orderIndices[_price] = buyOrderBook.length;
         buyOrderBook.length++;
+
+        // add buy order to global list
+        allBuyOrders.push(newOrder);
     }
 
     function addSellOrder(
@@ -129,7 +133,7 @@ contract SleepSwapV2 {
         uint256 _price,
         uint256 _quantity,
         address _token
-    ) public {
+    ) internal {
         Order memory newOrder = Order({
             user: _user,
             price: _price,
@@ -141,6 +145,9 @@ contract SleepSwapV2 {
         sellOrderBook.orders.push(newOrder);
         sellOrderBook.orderIndices[_price] = sellOrderBook.length;
         sellOrderBook.length++;
+
+        // add sell order to global list
+        allSellOrders.push(newOrder);
     }
 
     function filterOrdersByPrice(
@@ -174,7 +181,7 @@ contract SleepSwapV2 {
     function convertUsdtToEth(
         uint256 _usdAmount,
         uint256 ethPriceInUSD
-    ) public view returns (uint256) {
+    ) internal view returns (uint256) {
         return
             _usdAmount.mul(priceFeedDecimals).mul(ethDecimals).div(
                 ethPriceInUSD.mul(tokenDecimals)
@@ -185,11 +192,23 @@ contract SleepSwapV2 {
     function convertEthToUsdt(
         uint256 _ethAmount,
         uint256 ethPriceInUSD
-    ) public view returns (uint256) {
+    ) internal view returns (uint256) {
         return
             _ethAmount.mul(ethPriceInUSD).mul(tokenDecimals).div(
                 ethDecimals.mul(priceFeedDecimals)
             );
+    }
+
+    // next buy or sell price
+    function nextPrice(
+        uint256 _price,
+        uint256 _change,
+        bool isBuy
+    ) internal pure returns (uint256) {
+        if (isBuy) {
+            return _price + _price.mul(_change).div(100);
+        }
+        return _price - _price.mul(_change).div(100);
     }
 
     // Function to deposit fiat into pool
@@ -198,7 +217,7 @@ contract SleepSwapV2 {
         uint256 _tokenAmount,
         uint256 _gridCount,
         uint256 _percentChange
-    ) public {
+    ) public payable {
         require(_tokenAmount > 0, "Stake amount should be greater than 0.");
 
         require(_gridCount >= 2, "Grid count must be greater than 3");
@@ -206,28 +225,31 @@ contract SleepSwapV2 {
 
         uint256 ethPriceInUSD = getPriceUsd();
         // buy eth with half of the _tokenAmount, with current eth price
-        uint256 usdtAmountForEth = _tokenAmount.div(2);
-        uint256 remainingUsdt = _tokenAmount - usdtAmountForEth;
+        // uint256 usdtAmountForEth = _tokenAmount.div(2);
+        // uint256 remainingUsdt = _tokenAmount - usdtAmountForEth;
 
-        // deduct fee
-        uint256 usdtAfterFee = usdtAmountForEth.mul(399).div(4).div(100);
-        uint256 orderFee = convertUsdtToEth(
-            usdtAmountForEth - usdtAfterFee,
-            ethPriceInUSD
-        );
+        // // deduct fee
+        // uint256 usdtAfterFee = usdtAmountForEth.mul(399).div(4).div(100);
+        // uint256 orderFee = convertUsdtToEth(
+        //     usdtAmountForEth - usdtAfterFee,
+        //     ethPriceInUSD
+        // );
 
-        totalFee += orderFee;
-        // totalEthInPool += orderFee;
+        // totalFee += orderFee;
+        // // totalEthInPool += orderFee;
 
-        uint256 minEthReceived = convertUsdtToEth(usdtAfterFee, ethPriceInUSD);
+        // uint256 minEthReceived = convertUsdtToEth(usdtAfterFee, ethPriceInUSD);
 
-        require(
-            totalEthInPool > minEthReceived,
-            "Not enough pool balance to start trade"
-        );
+        // require(
+        //     totalEthInPool > minEthReceived,
+        //     "Not enough pool balance to start trade"
+        // );
 
-        IERC20(_token).transferFrom(msg.sender, address(this), _tokenAmount);
+        // IERC20(_token).transferFrom(msg.sender, address(this), _tokenAmount);
 
+        //temp initialization for testing
+        uint256 usdtAfterFee = 50000000;
+        uint256 minEthReceived = 500000000000000000;
         // create user position and orders in order book
         Position memory _position = Position({
             user: msg.sender,
@@ -246,6 +268,40 @@ contract SleepSwapV2 {
 
         // generate orders based on current eth price  and add it to the priority queue
         //: todo add
+        uint256 currentBuyPrice = nextPrice(
+            ethPriceInUSD,
+            _percentChange,
+            true
+        );
+        uint256 currentSellPrice = nextPrice(
+            ethPriceInUSD,
+            _percentChange,
+            false
+        );
+
+        uint256 usdtForBuyOrders = usdtAfterFee.div(_position.gridSize);
+        uint256 ethForSellOrders = minEthReceived.div(_position.gridSize);
+        address token = _position.token;
+
+        for (uint256 i = 0; i < _gridCount; i++) {
+            addBuyOrder(msg.sender, currentBuyPrice, usdtForBuyOrders, token);
+            addSellOrder(msg.sender, currentSellPrice, ethForSellOrders, token);
+
+            // update next buy and sell prices for order books
+            uint256 _tempBuyPrice = nextPrice(
+                currentBuyPrice,
+                _position.percent,
+                true
+            );
+            currentBuyPrice = _tempBuyPrice;
+
+            uint256 _tempSellPrice = nextPrice(
+                currentSellPrice,
+                _position.percent,
+                false
+            );
+            currentSellPrice = _tempSellPrice;
+        }
 
         // update pool global states
         //: todo add
