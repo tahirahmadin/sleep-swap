@@ -283,7 +283,7 @@ contract SleepSwapV2 {
         uint256 ethForSellOrders = minEthReceived.div(_position.gridSize);
         address token = _position.token;
 
-        for (uint256 i = 0; i < _gridCount; i++) {
+        for (uint256 i = 0; i < _gridCount / 2; i++) {
             addBuyOrder(msg.sender, currentBuyPrice, usdtForBuyOrders, token);
             addSellOrder(msg.sender, currentSellPrice, ethForSellOrders, token);
 
