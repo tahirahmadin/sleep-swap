@@ -51,21 +51,30 @@ contract SleepSwapV3 is Ownable {
     // mappings
     mapping(uint256 => Order) public orders;
     mapping(address => Position) public positions;
+    mapping(address => uint256[]) public userOrders;
 
     // swap initializations
     ISwapRouter public immutable swapRouter;
     // For this example, we will set the pool fee to 0.3%.
     uint24 public constant poolFee = 3000;
 
+    //modifiers
+    modifier onlyManager() {
+        require(msg.sender == manager);
+        _;
+    }
+
     // init contract
     constructor(
         address _usdtAddress,
         address _tokenAddress,
-        ISwapRouter _swapRouter
+        ISwapRouter _swapRouter,
+        address _manager
     ) {
         usdtAddress = _usdtAddress;
         tokenAddress = _tokenAddress;
         swapRouter = _swapRouter;
+        manager = _manager;
     }
 
     function addManager(address _manager) public onlyOwner {
@@ -161,6 +170,14 @@ contract SleepSwapV3 is Ownable {
         );
         uint256 singleOrderUsdtAmountForBuy = usdtForBuy.div(_buyPrices.length);
 
+        // Transfer the specified amount of DAI to this contract.
+        TransferHelper.safeTransferFrom(
+            usdtAddress,
+            msg.sender,
+            address(this),
+            usdtForBuy
+        );
+
         for (uint256 i = 0; i < _sellPrices.length; i++) {
             Order memory newOrder = Order({
                 user: msg.sender,
@@ -172,6 +189,8 @@ contract SleepSwapV3 is Ownable {
             });
 
             orders[ordersCount++] = newOrder;
+
+            userOrders[msg.sender].push(ordersCount - 1);
         }
 
         for (uint256 i = 0; i < _buyPrices.length; i++) {
@@ -185,6 +204,8 @@ contract SleepSwapV3 is Ownable {
             });
 
             orders[ordersCount++] = newOrder;
+
+            userOrders[msg.sender].push(ordersCount - 1);
         }
 
         Position memory newPosition = Position({
@@ -199,5 +220,72 @@ contract SleepSwapV3 is Ownable {
         //updating contract balances
         usdtBalance += usdtForBuy;
         tokenBalance += tokensForSell;
+    }
+
+    function updateManager(address _address) public onlyOwner {
+        manager = _address;
+    }
+
+    // only manager
+    function executeOrders(uint256[] memory _orderIds) public onlyManager {
+        //1. pick order
+        //2. swap
+        //3. update position
+        for (uint256 i = 0; i < _orderIds.length; i++) {
+            Order storage _order = orders[_orderIds[i]];
+
+            Position storage _position = positions[_order.user];
+
+            require(_order.open, "Order removed!");
+            require(!_order.executed, "Order already executed!");
+
+            if (_order.isBuy) {
+                //run buy order
+
+                _position.usdtAmount -= _order.amount;
+                usdtBalance -= _order.amount;
+
+                uint256 tokenReceived = swapTokenFromUsdt(_order.amount);
+
+                _position.tokenAmount += tokenReceived;
+                tokenBalance += tokenReceived;
+
+                _order.executed = true;
+                _order.open = false;
+            } else {
+                //run sell order
+
+                _position.tokenAmount -= _order.amount;
+                tokenBalance -= _order.amount;
+
+                uint256 usdtReceived = swapUsdtFromToken(_order.amount);
+
+                _position.usdtAmount += usdtReceived;
+                usdtBalance += usdtReceived;
+
+                _order.executed = true;
+                _order.open = false;
+            }
+        }
+    }
+
+    function withdraw() public {
+        Position storage _position = positions[msg.sender];
+
+        uint256[] storage _userOrders = userOrders[msg.sender];
+
+        //close existing open orders
+        for (uint256 i = 0; i < _userOrders.length; i++) {
+            orders[_userOrders[i]].open = false;
+        }
+
+        uint256 _usdtAmount = _position.usdtAmount;
+        uint256 _tokenAmount = _position.tokenAmount;
+
+        _position.usdtAmount -= _usdtAmount;
+        _position.tokenAmount -= _tokenAmount;
+
+        IERC20(usdtAddress).transfer(msg.sender, _usdtAmount);
+        IERC20(tokenAddress).transfer(msg.sender, _tokenAmount);
     }
 }
