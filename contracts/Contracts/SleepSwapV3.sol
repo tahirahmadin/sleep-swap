@@ -6,7 +6,6 @@ pragma abicoder v2;
 // swap imports
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -29,6 +28,12 @@ contract SleepSwapV3 is Ownable {
     uint256 public usdtBalance;
     uint256 public tokenBalance;
 
+    // Fees
+    uint256 public usdtFees;
+    uint256 public tokenFees;
+    uint256 public feePercent = 30;
+
+    // User position of balances
     struct Position {
         address user;
         uint256 usdtDeposit; // usdt amount user added initially
@@ -38,6 +43,7 @@ contract SleepSwapV3 is Ownable {
     }
 
     struct Order {
+        uint256 orderId;
         address user;
         uint256 price;
         uint256 amount;
@@ -64,6 +70,38 @@ contract SleepSwapV3 is Ownable {
         _;
     }
 
+    // events:
+    event Staked(
+        address indexed user,
+        uint256 amount,
+        uint256 usdtForBuy,
+        uint256 tokensForSell
+    );
+    event OrderCreated(
+        uint256 orderId,
+        address user,
+        uint256 price,
+        uint256 amount,
+        bool isBuy,
+        bool open,
+        bool executed
+    );
+    event OrderExecuted(
+        uint256 orderId,
+        address user,
+        uint256 price,
+        uint256 amount,
+        bool isBuy,
+        bool open,
+        bool executed
+    );
+    event CancelOrder(address indexed user, uint256 orderId, bool isBuy);
+    event Withdraw(
+        address indexed user,
+        uint256 usdtAmount,
+        uint256 tokenAmount
+    );
+
     // init contract
     constructor(
         address _usdtAddress,
@@ -87,6 +125,11 @@ contract SleepSwapV3 is Ownable {
     ) public returns (uint256 amountOut) {
         // msg.sender must approve this contract
 
+        //Deducting fees
+        uint256 deductedFees = _amountIn.mul(feePercent).div(10000);
+        usdtFees += deductedFees;
+        uint256 _usdtForTrade = _amountIn - deductedFees;
+
         address _fromToken = usdtAddress;
         address _toToken = tokenAddress;
 
@@ -95,11 +138,15 @@ contract SleepSwapV3 is Ownable {
             usdtAddress,
             msg.sender,
             address(this),
-            _amountIn
+            _usdtForTrade
         );
 
         // Approve the router to spend DAI.
-        TransferHelper.safeApprove(_fromToken, address(swapRouter), _amountIn);
+        TransferHelper.safeApprove(
+            _fromToken,
+            address(swapRouter),
+            _usdtForTrade
+        );
 
         // Naively set amountOutMinimum to 0. In production, use an oracle or other data source to choose a safer value for amountOutMinimum.
         // We also set the sqrtPriceLimitx96 to be 0 to ensure we swap our exact input amount.
@@ -110,7 +157,7 @@ contract SleepSwapV3 is Ownable {
                 fee: poolFee,
                 recipient: address(this),
                 deadline: block.timestamp,
-                amountIn: _amountIn,
+                amountIn: _usdtForTrade,
                 amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0
             });
@@ -124,6 +171,11 @@ contract SleepSwapV3 is Ownable {
     ) public returns (uint256 amountOut) {
         // msg.sender must approve this contract
 
+        //Deducting fees
+        uint256 deductedFees = _amountIn.mul(feePercent).div(10000);
+        tokenFees += deductedFees;
+        uint256 _tokenForTrade = _amountIn - deductedFees;
+
         address _fromToken = tokenAddress;
         address _toToken = usdtAddress;
 
@@ -132,11 +184,15 @@ contract SleepSwapV3 is Ownable {
             usdtAddress,
             msg.sender,
             address(this),
-            _amountIn
+            _tokenForTrade
         );
 
         // Approve the router to spend DAI.
-        TransferHelper.safeApprove(_fromToken, address(swapRouter), _amountIn);
+        TransferHelper.safeApprove(
+            _fromToken,
+            address(swapRouter),
+            _tokenForTrade
+        );
 
         // Naively set amountOutMinimum to 0. In production, use an oracle or other data source to choose a safer value for amountOutMinimum.
         // We also set the sqrtPriceLimitx96 to be 0 to ensure we swap our exact input amount.
@@ -147,7 +203,7 @@ contract SleepSwapV3 is Ownable {
                 fee: poolFee,
                 recipient: address(this),
                 deadline: block.timestamp,
-                amountIn: _amountIn,
+                amountIn: _tokenForTrade,
                 amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0
             });
@@ -180,6 +236,7 @@ contract SleepSwapV3 is Ownable {
 
         for (uint256 i = 0; i < _sellPrices.length; i++) {
             Order memory newOrder = Order({
+                orderId: ordersCount + 1,
                 user: msg.sender,
                 price: _sellPrices[i],
                 amount: singleOrderTokenAmountForSell,
@@ -191,10 +248,22 @@ contract SleepSwapV3 is Ownable {
             orders[ordersCount++] = newOrder;
 
             userOrders[msg.sender].push(ordersCount - 1);
+
+            // emit event
+            emit OrderCreated(
+                newOrder.orderId,
+                msg.sender,
+                newOrder.price,
+                newOrder.amount,
+                newOrder.isBuy,
+                newOrder.open,
+                newOrder.executed
+            );
         }
 
         for (uint256 i = 0; i < _buyPrices.length; i++) {
             Order memory newOrder = Order({
+                orderId: ordersCount + 1,
                 user: msg.sender,
                 price: _buyPrices[i],
                 amount: singleOrderUsdtAmountForBuy,
@@ -204,8 +273,17 @@ contract SleepSwapV3 is Ownable {
             });
 
             orders[ordersCount++] = newOrder;
-
             userOrders[msg.sender].push(ordersCount - 1);
+
+            emit OrderCreated(
+                newOrder.orderId,
+                msg.sender,
+                newOrder.price,
+                newOrder.amount,
+                newOrder.isBuy,
+                newOrder.open,
+                newOrder.executed
+            );
         }
 
         Position memory newPosition = Position({
@@ -220,10 +298,16 @@ contract SleepSwapV3 is Ownable {
         //updating contract balances
         usdtBalance += usdtForBuy;
         tokenBalance += tokensForSell;
+        emit Staked(msg.sender, _amount, usdtForBuy, tokensForSell);
     }
 
     function updateManager(address _address) public onlyOwner {
         manager = _address;
+    }
+
+    // Update fees
+    function updateFeesPercentage(uint256 _newPercentage) public onlyOwner {
+        feePercent = _newPercentage;
     }
 
     // only manager
@@ -252,6 +336,17 @@ contract SleepSwapV3 is Ownable {
 
                 _order.executed = true;
                 _order.open = false;
+
+                // emit event
+                emit OrderExecuted(
+                    _order.orderId,
+                    msg.sender,
+                    _order.price,
+                    _order.amount,
+                    _order.isBuy,
+                    false,
+                    true
+                );
             } else {
                 //run sell order
 
@@ -265,6 +360,17 @@ contract SleepSwapV3 is Ownable {
 
                 _order.executed = true;
                 _order.open = false;
+
+                // emit event
+                emit OrderExecuted(
+                    _order.orderId,
+                    msg.sender,
+                    _order.price,
+                    _order.amount,
+                    _order.isBuy,
+                    false,
+                    true
+                );
             }
         }
     }
@@ -277,6 +383,12 @@ contract SleepSwapV3 is Ownable {
         //close existing open orders
         for (uint256 i = 0; i < _userOrders.length; i++) {
             orders[_userOrders[i]].open = false;
+            // emit event
+            emit CancelOrder(
+                msg.sender,
+                orders[_userOrders[i]].orderId,
+                orders[_userOrders[i]].isBuy
+            );
         }
 
         uint256 _usdtAmount = _position.usdtAmount;
