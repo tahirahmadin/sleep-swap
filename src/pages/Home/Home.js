@@ -1,21 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
-import {
-  Box,
-  Button,
-  Container,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Box, Container, Grid, Typography, useTheme } from "@mui/material";
 import PoolCard from "./components/PoolCard";
-import PoolCardDisabled from "./components/PoolCardDisabled";
-import { useTokenAllowance } from "../../hooks/useAllowance";
-import { SLEEP_SWAP_ADDRESSES, TOKENS } from "../../constants";
 import { useChain } from "react-moralis";
 import PoolCardDisabledMatic from "./components/PoolCardDisabled";
 import PoolCardDisabledLink from "./components/PoolDisabledCard";
