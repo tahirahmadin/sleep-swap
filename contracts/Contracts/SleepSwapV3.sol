@@ -86,15 +86,16 @@ contract SleepSwapV3 is Ownable {
         bool open,
         bool executed
     );
+
     event OrderExecuted(
         uint256 orderId,
         address user,
         uint256 price,
         uint256 amount,
         bool isBuy,
-        bool open,
-        bool executed
+        uint256 recieved
     );
+
     event CancelOrder(address indexed user, uint256 orderId, bool isBuy);
     event Withdraw(
         address indexed user,
@@ -344,8 +345,7 @@ contract SleepSwapV3 is Ownable {
                     _order.price,
                     _order.amount,
                     _order.isBuy,
-                    false,
-                    true
+                    tokenReceived
                 );
             } else {
                 //run sell order
@@ -368,8 +368,7 @@ contract SleepSwapV3 is Ownable {
                     _order.price,
                     _order.amount,
                     _order.isBuy,
-                    false,
-                    true
+                    usdtReceived
                 );
             }
         }

@@ -1,20 +1,55 @@
-type PoolData @entity {
-  id: ID!
-  totalEth: BigInt
-  totalToken: BigInt
-  totalOrders: BigInt
-  ordersCompleted: BigInt
-  ordersActive: BigInt
-  averageGain: BigInt
+#user current position: update on every deposits, withdraw, order executions
+type Position @entity {
+  id: ID! # create user address as id
+  user: Bytes! # address
+  usdtDeposit: BigInt!
+  usdtAmount: BigInt!
+  tokenAmount: BigInt!
+  pnl: BigInt!
 }
 
-type UserActivity @entity {
+#user deposit records: create on every deposits
+type Deposit @entity {
   id: ID!
-  type: String! # buy/sell/deposit/withdraw
-  atPrice: BigInt! # eth price when activity runs
-  userAddress: Bytes! # address
+  user: Bytes! # address
+  amount: BigInt!
+  usdtForBuy: BigInt!
+  tokensForSell: BigInt!
+}
+
+#user withdraw records: record on every user withdrawals
+type Withdrawal @entity {
+  id: ID!
+  user: Bytes! # address
+  usdtAmount: BigInt
   tokenAmount: BigInt
-  ethAmount: BigInt
-  timestamp: BigInt!
-  blockNumber: BigInt!
+}
+
+#order records: create order records and update when order executed
+type Order @entity {
+  id: ID! # create orderId as id
+  user: Bytes! # address
+  price: BigInt
+  amount: BigInt
+  isBuy: Boolean!
+  open: Boolean!
+  executed: Boolean!
+}
+
+#order execution records: create records on every order executions
+type OrderExecution @entity {
+  id: ID! # create orderId as id
+  user: Bytes! # address
+  price: BigInt
+  amount: BigInt
+  isBuy: Boolean!
+  recieved: BigInt!
+}
+
+#order cancellation records: create records on every order cancellations
+type OrderCancellation @entity {
+  id: ID!
+  user: Bytes! # address
+  orderId: BigInt
+  isBuy: Boolean!
 }

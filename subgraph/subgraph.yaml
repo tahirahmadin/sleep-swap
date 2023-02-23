@@ -3,37 +3,34 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: YeildSwap
-    network: kovan
+    name: SleepSwapV3
+    network: mumbai
     source:
-      address: "0xbb10bdb087d482F3CF04f2FEb627252CE580aea7"
-      abi: YeildSwap
-      startBlock: 31784804
+      address: "0x98c9AB0dC8154cbbc7B15E20AB367c42def3190B"
+      abi: SleepSwapV3
+      startBlock: 32293482
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - DepositReserve
-        - OwnershipTransferred
-        - RunOrder
-        - StartYieldSwap
-        - WithdrawReserves
-        - WithdrawUserFunds
+        - Staked
+        - OrderCreated
+        - Withdraw
+        - OrderExecuted
+        - CancelOrder
       abis:
-        - name: YeildSwap
-          file: ./abis/YeildSwap.json
+        - name: SleepSwapV3
+          file: ./abis/SleepSwapV3.json
       eventHandlers:
-        - event: DepositReserve(address,uint256,uint256)
-          handler: handleDepositReserve
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
-        - event: RunOrder(address,string,uint256,uint256,uint256,uint256)
-          handler: handleRunOrder
-        - event: StartYieldSwap(address,uint256,uint256,int256,uint256)
-          handler: handleStartYieldSwap
-        - event: WithdrawReserves(address,uint256,uint256)
-          handler: handleWithdrawReserves
-        - event: WithdrawUserFunds(address,uint256,uint256)
-          handler: handleWithdrawUserFunds
+        - event: Staked(indexed address,uint256,uint256,uint256)
+          handler: handleStaked
+        - event: OrderCreated(uint256,address,uint256,uint256,bool,bool,bool)
+          handler: handleOrderCreated
+        - event: OrderExecuted(uint256,address,uint256,uint256,bool,uint256)
+          handler: handleOrderExecuted
+        - event: CancelOrder(indexed address,uint256,bool)
+          handler: handleCancelOrder
+        - event: Withdraw(indexed address,uint256,uint256)
+          handler: handleWithdraw
       file: ./src/mapping.ts
