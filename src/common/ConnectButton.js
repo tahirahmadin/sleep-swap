@@ -152,36 +152,23 @@ export default function ConnectButton() {
       .request({
         method: "wallet_addEthereumChain",
         params: [
-          // {
-          //   chainId: "0x13881",
-          //   chainName: "Polygon Test Network",
-          //   nativeCurrency: {
-          //     name: "MATIC",
-          //     symbol: "MATICT",
-          //     decimals: 18,
-          //   },
-          //   rpcUrls: ["https://matic-mumbai.chainstacklabs.com/"],
-          //   blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
-          // },
           {
-            chainId: "0x2A",
-            chainName: "Kovan Test Network",
+            chainId: "0x13881",
+            chainName: "Polygon Test Network",
             nativeCurrency: {
-              name: "ETHEREUM",
-              symbol: "ETH",
+              name: "MATIC",
+              symbol: "MATICT",
               decimals: 18,
             },
-            rpcUrls: [" https://kovan.infura.io/v3/"],
-            blockExplorerUrls: ["https://kovan.etherscan.io"],
+            rpcUrls: ["https://matic-mumbai.chainstacklabs.com/"],
+            blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
           },
         ],
       })
       .catch(async (err) => {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-
-          // params: [{ chainId: "0x13881" }], // chainId must be in hexadecimal numbers
-          params: [{ chainId: "0x2A" }], // chainId must be in hexadecimal numbers
+          params: [{ chainId: "0x13881" }], // chainId must be in hexadecimal numbers
         });
       });
   };
@@ -197,8 +184,8 @@ export default function ConnectButton() {
 
   const fetchBalance = async () => {
     const result = await Web3Api.account.getNativeBalance({
-      network: "kovan",
-      chain: "kovan",
+      network: "mumbai",
+      chain: "mumbai",
     });
 
     console.log(result.balance);
@@ -218,7 +205,7 @@ export default function ConnectButton() {
   //     </div>
   //   );
   // }
-  if (chainId != null && chainId !== "0x2a") {
+  if (chainId != null && chainId !== "0x13881") {
     return (
       <div>
         {console.log(chainId)}
