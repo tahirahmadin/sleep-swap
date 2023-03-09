@@ -1,158 +1,135 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import {
-  YeildSwap,
-  DepositReserve,
-  OwnershipTransferred,
-  RunOrder,
-  StartYieldSwap,
-  WithdrawReserves,
-  WithdrawUserFunds,
-} from "../generated/YeildSwap/YeildSwap";
-import { UserActivity, PoolData } from "../generated/schema";
+  CancelOrder,
+  OrderCreated,
+  OrderExecuted,
+  Staked,
+  Withdraw,
+} from "../generated/SleepSwapV3/SleepSwapV3";
+import {
+  Deposit,
+  Order,
+  OrderCancellation,
+  OrderExecution,
+  Position,
+  Withdrawal,
+} from "../generated/schema";
 
-export function handleDepositReserve(event: DepositReserve): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = PoolData.load(event.transaction.hash.toHex());
-
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (entity == null) {
-    entity = new PoolData(event.transaction.hash.toHex());
-
-    // Entity fields can be set using simple assignments
-    // entity.count = PoolData.fromI32(0);
-  }
+export function handleStaked(event: Staked): void {
+  // create new deposit records
+  let entity = new Deposit(event.transaction.hash.toHex());
 
   // BigInt and BigDecimal math are supported
-  entity.totalEth = event.params.ethAmount;
-
-  // Entity fields can be set based on event parameters
-  entity.totalToken = event.params.tokenAmount;
-
-  // Entities can be written to the store with `.save()`
+  entity.user = event.params.user;
+  entity.amount = event.params.amount;
+  entity.usdtForBuy = event.params.usdtForBuy;
+  entity.tokensForSell = event.params.tokensForSell;
   entity.save();
 
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
+  // create new position or update existing position
 
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.interval(...)
-  // - contract.lastTimeStamp(...)
-  // - contract.manager(...)
-  // - contract.orderPrices(...)
-  // - contract.orderQue(...)
-  // - contract.orderQuePointer(...)
-  // - contract.orderTypes(...)
-  // - contract.owner(...)
-  // - contract.runningIndexUpdate(...)
-  // - contract.runningOrders(...)
-  // - contract.skippedRunns(...)
-  // - contract.stakers(...)
-  // - contract.totalEthInPool(...)
-  // - contract.totalFee(...)
-  // - contract.totalUsdtInPool(...)
-  // - contract.users(...)
-  // - contract.getPriceUsd(...)
-  // - contract.convertUsdtToEth(...)
-  // - contract.convertEthToUsdt(...)
-  // - contract.getPoolInfo(...)
-  // - contract.getUserInfo(...)
-  // - contract.getUserOrderStatus(...)
-  // - contract.ethTotalBalance(...)
-  // - contract.usdtBalance(...)
-  // - contract.checkUpkeep(...)
-}
+  let positionEntity = Position.load(event.params.user.toHex());
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
-
-export function handleRunOrder(event: RunOrder): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let userActivity = UserActivity.load(event.transaction.hash.toHex());
-
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (userActivity == null) {
-    userActivity = new UserActivity(event.transaction.hash.toHex());
+  if (!positionEntity) {
+    positionEntity = new Position(event.params.user.toHex());
   }
 
-  // Entity fields can be set based on event parameters
-  userActivity.type = event.params.orderType;
-  userActivity.atPrice = event.params.ethPirce;
-  userActivity.userAddress = event.params.user;
-  userActivity.tokenAmount =
-    event.params.orderType == "buy"
-      ? event.params.fromAmount
-      : event.params.toAmount;
-  userActivity.ethAmount =
-    event.params.orderType == "sell"
-      ? event.params.fromAmount
-      : event.params.toAmount;
-  userActivity.timestamp = event.block.timestamp;
-  userActivity.blockNumber = event.block.number;
-
-  // Entities can be written to the store with `.save()`
-  userActivity.save();
+  positionEntity.user = event.params.user;
+  positionEntity.usdtDeposit = positionEntity.usdtDeposit.plus(
+    event.params.amount
+  );
+  positionEntity.usdtAmount = positionEntity.usdtAmount.plus(
+    event.params.usdtForBuy
+  );
+  positionEntity.tokenAmount = positionEntity.tokenAmount.plus(
+    event.params.tokensForSell
+  );
+  positionEntity.save();
 }
 
-export function handleStartYieldSwap(event: StartYieldSwap): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let userActivity = UserActivity.load(event.transaction.hash.toHex());
+export function handleOrderCreated(event: OrderCreated): void {
+  // create new deposit records
+  let orderEntiry = new Order(event.params.orderId.toHex());
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (userActivity == null) {
-    userActivity = new UserActivity(event.transaction.hash.toHex());
-  }
-
-  // Entity fields can be set based on event parameters
-  userActivity.type = "deposit";
-  userActivity.atPrice = event.params.ethPrice;
-  userActivity.userAddress = event.params.userAddress;
-  userActivity.tokenAmount = event.params.tokenAmount;
-  userActivity.ethAmount = BigInt.fromI32(0);
-  userActivity.timestamp = event.block.timestamp;
-  userActivity.blockNumber = event.block.number;
-
-  // Entities can be written to the store with `.save()`
-  userActivity.save();
+  // BigInt and BigDecimal math are supported
+  orderEntiry.user = event.params.user;
+  orderEntiry.price = event.params.price;
+  orderEntiry.amount = event.params.amount;
+  orderEntiry.isBuy = event.params.isBuy;
+  orderEntiry.open = event.params.open;
+  orderEntiry.executed = event.params.executed;
+  orderEntiry.save();
 }
 
-export function handleWithdrawReserves(event: WithdrawReserves): void {}
+export function handleOrderExecuted(event: OrderExecuted): void {
+  // create new deposit records
+  let executedOrder = new OrderExecution(event.params.orderId.toHex());
 
-export function handleWithdrawUserFunds(event: WithdrawUserFunds): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let userActivity = UserActivity.load(event.transaction.hash.toHex());
+  // BigInt and BigDecimal math are supported
+  executedOrder.user = event.params.user;
+  executedOrder.price = event.params.price;
+  executedOrder.amount = event.params.amount;
+  executedOrder.isBuy = event.params.isBuy;
+  executedOrder.recieved = event.params.recieved;
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (userActivity == null) {
-    userActivity = new UserActivity(event.transaction.hash.toHex());
+  let createdOrder = Order.load(event.params.orderId.toHex());
+
+  executedOrder.save();
+  if (createdOrder == null) {
+    return;
   }
 
-  // Entity fields can be set based on event parameters
-  userActivity.type = "withdraw";
-  userActivity.atPrice = event.params.ethPrice;
-  userActivity.userAddress = event.params.user;
-  userActivity.tokenAmount = event.params.userUsdt;
-  userActivity.ethAmount = BigInt.fromI32(0);
-  userActivity.timestamp = event.block.timestamp;
-  userActivity.blockNumber = event.block.number;
+  createdOrder.open = false;
+  createdOrder.executed = true;
+  createdOrder.save();
 
-  // Entities can be written to the store with `.save()`
-  userActivity.save();
+  // position update:
+}
+
+export function handleCancelOrder(event: CancelOrder): void {
+  // create new deposit records
+  let cancellation = new OrderCancellation(event.params.orderId.toHex());
+
+  // BigInt and BigDecimal math are supported
+  cancellation.user = event.params.user;
+  cancellation.orderId = event.params.orderId;
+  cancellation.isBuy = event.params.isBuy;
+  cancellation.save();
+
+  let createdOrder = Order.load(event.params.orderId.toHex());
+
+  if (createdOrder == null) {
+    return;
+  }
+
+  createdOrder.open = false;
+  createdOrder.executed = false;
+  createdOrder.save();
+}
+
+export function handleWithdraw(event: Withdraw): void {
+  // create new deposit records
+  let withdraw = new Withdrawal(event.transaction.hash.toHex());
+
+  // BigInt and BigDecimal math are supported
+  withdraw.user = event.params.user;
+  withdraw.usdtAmount = event.params.usdtAmount;
+  withdraw.tokenAmount = event.params.tokenAmount;
+  withdraw.save();
+
+  //update userposition
+  let userPosition = Position.load(event.params.user.toHex());
+
+  if (userPosition == null) {
+    return;
+  }
+
+  userPosition.usdtDeposit = userPosition.usdtDeposit.minus(
+    event.params.usdtAmount
+  );
+  userPosition.tokenAmount = userPosition.usdtAmount.minus(
+    event.params.tokenAmount
+  );
+  userPosition.usdtDeposit = BigInt.fromI32(0);
+  userPosition.save();
 }
